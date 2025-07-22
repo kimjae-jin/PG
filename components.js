@@ -147,3 +147,22 @@ export function renderWeeklyMeetingList() {
 export function renderWeeklyMeetingForm(meeting) {
     // 주간회의는 준비중이므로 폼 렌더링 없음
 }
+
+// 테마 관리 컴포넌트 렌더링 함수
+export function renderThemeContent() {
+    const themePanel = document.getElementById('themePanel');
+    if (themePanel) {
+        themePanel.innerHTML = `
+            <div class="panel-content-wrapper h-full">
+                <div class="panel-header">
+                    <h3 class="text-2xl font-bold text-primary">테마 선택</h3>
+                </div>
+                <div class="flex flex-col space-y-4">
+                    <button id="selectStarbucksThemeBtn" class="btn-primary">스타벅스 테마 적용</button>
+                    <button id="selectAppleThemeBtn" class="btn-primary">애플 테마 적용</button>
+                </div>
+            </div>
+        `;
+    }
+    console.log("Theme Content Rendered.");
+}

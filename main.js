@@ -4,7 +4,7 @@ import { engineers, projects, businessLicenses, weeklyMeetings,
          updateEngineers, updateProjects, updateBusinessLicenses, updateWeeklyMeetings,
          updateCurrentEngineerId, updateCurrentProjectId, updateCurrentBusinessLicenseId, updateCurrentWeeklyMeetingId } from './data.js';
 import { saveAllData, loadAllData } from './storage.js';
-import { renderEngineerContent, renderProjectContent, renderBusinessLicenseContent, renderWeeklyMeetingContent, updateComponentData } from './components.js';
+import { renderEngineerContent, renderProjectContent, renderBusinessLicenseContent, renderWeeklyMeetingContent, renderThemeContent, updateComponentData } from './components.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     // 1. 데이터 로드 (가장 먼저 수행)
@@ -17,9 +17,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const darkModeToggle = document.getElementById('darkModeToggle');
     const htmlElement = document.documentElement; // <html> 태그
 
-    // 저장된 테마 설정 불러오기 및 초기 적용
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
+    // 저장된 다크/라이트 모드 설정 불러오기 및 초기 적용
+    const savedDarkModePreference = localStorage.getItem('darkMode');
+    if (savedDarkModePreference === 'dark') {
         htmlElement.classList.add('dark');
     } else {
         htmlElement.classList.remove('dark');
@@ -29,9 +29,9 @@ document.addEventListener('DOMContentLoaded', () => {
         darkModeToggle.addEventListener('click', () => {
             htmlElement.classList.toggle('dark');
             if (htmlElement.classList.contains('dark')) {
-                localStorage.setItem('theme', 'dark');
+                localStorage.setItem('darkMode', 'dark');
             } else {
-                localStorage.setItem('theme', 'light');
+                localStorage.setItem('darkMode', 'light');
             }
         });
     }
@@ -41,14 +41,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const engineerTabBtn = document.getElementById('engineerTabBtn');
     const businessLicenseTabBtn = document.getElementById('businessLicenseTabBtn');
     const weeklyMeetingTabBtn = document.getElementById('weeklyMeetingTabBtn');
+    const themeTabBtn = document.getElementById('themeTabBtn'); // 테마 버튼 추가
 
     const projectPanel = document.getElementById('projectPanel');
     const engineerPanel = document.getElementById('engineerPanel');
     const businessLicensePanel = document.getElementById('businessLicensePanel');
     const weeklyMeetingPanel = document.getElementById('weeklyMeetingPanel');
+    const themePanel = document.getElementById('themePanel'); // 테마 패널 추가
 
-    const sidebarButtons = [projectTabBtn, engineerTabBtn, businessLicenseTabBtn, weeklyMeetingTabBtn];
-    const contentPanels = [projectPanel, engineerPanel, businessLicensePanel, weeklyMeetingPanel];
+    const sidebarButtons = [projectTabBtn, engineerTabBtn, businessLicenseTabBtn, weeklyMeetingTabBtn, themeTabBtn]; // 테마 버튼 포함
+    const contentPanels = [projectPanel, engineerPanel, businessLicensePanel, weeklyMeetingPanel, themePanel]; // 테마 패널 포함
 
     function switchPanel(activePanelElement, activeTabButton) {
         // 모든 패널 숨기기
@@ -70,11 +72,24 @@ document.addEventListener('DOMContentLoaded', () => {
             renderBusinessLicenseContent();
         } else if (activePanelElement.id === 'weeklyMeetingPanel') {
             renderWeeklyMeetingContent();
+        } else if (activePanelElement.id === 'themePanel') { // 테마 패널 렌더링
+            renderThemeContent();
+            // 테마 선택 버튼에 이벤트 리스너 추가 (패널 렌더링 후)
+            document.getElementById('selectStarbucksThemeBtn').addEventListener('click', () => setTheme('starbucks'));
+            document.getElementById('selectAppleThemeBtn').addEventListener('click', () => setTheme('apple'));
         }
 
         // 마지막 활성 패널을 localStorage에 저장
         localStorage.setItem('activePanel', activePanelElement.id);
         saveAllData(); // 현재 상태 저장 (예: 현재 선택된 ID 등)
+    }
+
+    // 테마 변경 함수
+    function setTheme(themeName) {
+        const themeStylesheet = document.getElementById('theme-stylesheet');
+        themeStylesheet.href = `themes/${themeName}-theme.css`;
+        localStorage.setItem('activeTheme', themeName);
+        console.log(`Theme set to: ${themeName}`);
     }
 
     // 초기 로딩 시 마지막 활성 패널을 불러오거나 'engineerPanel'을 기본으로 설정
@@ -92,9 +107,20 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (lastActivePanelId === 'weeklyMeetingPanel' && weeklyMeetingPanel) {
         initialPanel = weeklyMeetingPanel;
         initialButton = weeklyMeetingTabBtn;
+    } else if (lastActivePanelId === 'themePanel' && themePanel) { // 테마 패널도 초기 로드 가능하도록
+        initialPanel = themePanel;
+        initialButton = themeTabBtn;
     }
     // 초기 패널 활성화
     switchPanel(initialPanel, initialButton);
+
+    // 초기 로딩 시 저장된 테마 불러와 적용
+    const savedTheme = localStorage.getItem('activeTheme');
+    if (savedTheme) {
+        setTheme(savedTheme);
+    } else {
+        setTheme('starbucks'); // 기본 테마 설정
+    }
 
 
     // 사이드바 버튼 클릭 이벤트 리스너
@@ -102,6 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
     engineerTabBtn.addEventListener('click', () => switchPanel(engineerPanel, engineerTabBtn));
     businessLicenseTabBtn.addEventListener('click', () => switchPanel(businessLicensePanel, businessLicenseTabBtn));
     weeklyMeetingTabBtn.addEventListener('click', () => switchPanel(weeklyMeetingPanel, weeklyMeetingTabBtn));
+    themeTabBtn.addEventListener('click', () => switchPanel(themePanel, themeTabBtn)); // 테마 버튼 이벤트 리스너
 
     // 각 패널 내부에 있는 '추가' 버튼과 같은 동적으로 생성되는 요소에 대한 이벤트는
     // 해당 컴포넌트 렌더링 함수 (예: renderEngineerContent) 내에서 처리해야 합니다.

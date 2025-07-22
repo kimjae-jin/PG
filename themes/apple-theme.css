@@ -1,0 +1,163 @@
+/* themes/apple-theme.css: 애플 다크모드 테마 전용 스타일 (블루/그린 완전 제거, 중립적인 그레이 계열 강조) */
+
+/* 애플 다크모드 컨셉 컬러 팔레트 (블루/그린 계열 제거) */
+:root {
+    /* 이 테마는 주로 다크 모드를 위해 설계되었으므로, light 모드 변수는 다크 모드와 유사하게 설정하거나,
+       필요시 별도의 light 모드 팔레트를 정의할 수 있습니다.
+       현재는 다크 모드에 초점을 맞춰 변수를 정의합니다.
+       포인트 색상도 중립적인 밝은 회색 계열로 변경합니다.
+    */
+    --apple-dark-bg-primary: #1C1C1E; /* 바디 및 메인 배경 (거의 검정) */
+    --apple-dark-bg-secondary: #2C2C2E; /* 사이드바, 헤더, 패널 배경 (조금 밝은 검정) */
+    --apple-dark-bg-tertiary: #3A3A3C; /* 리스트 아이템, 폼 요소 배경 (더 밝은 검정) */
+    --apple-dark-text-primary: #E0E0E0; /* 기본 텍스트 (밝은 회색) */
+    --apple-dark-text-secondary: #AEAEB2; /* 보조 텍스트 (중간 회색) */
+    --apple-dark-accent-color: #727276; /* 새로운 포인트 색상: 중립적인 밝은 회색 (ex: 사이드바 active 버튼) */
+    --apple-dark-border: #48484A; /* 경계선 색상 (어두운 회색) */
+    --apple-dark-shadow: rgba(0, 0, 0, 0.5); /* 그림자 색상 */
+
+    /* 요소별 색상 변수 - 밝은 모드
+       여기서도 포인트 색상을 새로운 중립적인 회색으로 변경합니다.
+    */
+    --main-bg: #F2F2F7; /* 밝은 모드 기본 배경 (거의 흰색) */
+    --header-bg: #FFFFFF;
+    --header-text: #1C1C1E;
+    --toggle-bg: rgba(0, 0, 0, 0.1);
+    --toggle-text: #333;
+    --sidebar-bg: #F9F9F9;
+    --sidebar-text: #333;
+    --sidebar-hover-bg: #E0E0E0;
+    --sidebar-active-bg: #D0D0D0;
+    --content-bg: #FFFFFF;
+    --panel-list-border: #E0E0E0;
+    --list-item-bg: #FFFFFF;
+    --list-item-hover-bg: #F0F0F0;
+    --list-item-active-bg: #E0E0E0;
+    --list-item-active-text: #1C1C1E;
+    --form-element-bg: #FFFFFF;
+    --form-element-border: #D0D0D0;
+    --button-primary-bg: #727276; /* 포인트 색상 적용 */
+    --button-primary-hover-bg: #606064; /* 포인트 색상 호버 */
+    --button-secondary-bg: #E0E0E0;
+    --button-secondary-hover-bg: #D0D0D0;
+    --button-outline-border: #727276; /* 포인트 색상 적용 */
+    --button-outline-text: #727276; /* 포인트 색상 적용 */
+    --button-outline-hover-bg: rgba(114, 114, 118, 0.1); /* 포인트 색상 투명 호버 */
+}
+
+/* 다크 모드 컬러 팔레트 적용 */
+.dark {
+    --main-bg: var(--apple-dark-bg-primary);
+    --header-bg: var(--apple-dark-bg-secondary);
+    --header-text: var(--apple-dark-text-primary);
+    --toggle-bg: rgba(255, 255, 255, 0.1);
+    --toggle-text: var(--apple-dark-text-primary);
+    --sidebar-bg: var(--apple-dark-bg-secondary);
+    --sidebar-text: var(--apple-dark-text-primary);
+    --sidebar-hover-bg: rgba(255, 255, 255, 0.1);
+    --sidebar-active-bg: var(--apple-dark-accent-color); /* 새로운 포인트 색상 적용 */
+    --content-bg: var(--apple-dark-bg-primary);
+    --panel-list-border: var(--apple-dark-border);
+    --list-item-bg: var(--apple-dark-bg-tertiary);
+    --list-item-hover-bg: #48484A; /* 약간 더 밝게 */
+    --list-item-active-bg: var(--apple-dark-accent-color); /* 새로운 포인트 색상 적용 */
+    --list-item-active-text: var(--apple-dark-text-primary); /* 활성 항목 텍스트는 밝은 회색 유지 */
+    --form-element-bg: var(--apple-dark-bg-tertiary);
+    --form-element-border: var(--apple-dark-border);
+    --button-primary-bg: var(--apple-dark-accent-color);
+    --button-primary-hover-bg: #606064;
+    --button-secondary-bg: var(--apple-dark-border);
+    --button-secondary-hover-bg: #555;
+    --button-outline-border: var(--apple-dark-accent-color);
+    --button-outline-text: var(--apple-dark-accent-color);
+    --button-outline-hover-bg: rgba(114, 114, 118, 0.1);
+}
+
+/* 테마 의존적인 요소 스타일 적용 (여기에 정의된 변수 사용) */
+body {
+    background-color: var(--main-bg);
+    color: var(--text-primary);
+}
+header {
+    background-color: var(--header-bg);
+    color: var(--header-text);
+    box-shadow: 0 2px 4px var(--apple-dark-shadow);
+}
+#darkModeToggle {
+    background-color: var(--toggle-bg);
+    color: var(--toggle-text);
+}
+.sidebar {
+    background-color: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    box-shadow: 2px 0 5px var(--apple-dark-shadow);
+}
+.sidebar-button {
+    color: var(--sidebar-text);
+}
+.sidebar-button:hover {
+    background-color: var(--sidebar-hover-bg);
+}
+.sidebar-button.active {
+    background-color: var(--sidebar-active-bg);
+    color: var(--sidebar-active-text);
+}
+.content-area {
+    background-color: var(--content-bg);
+    color: var(--text-primary);
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+}
+.form-input, .form-select, .form-textarea {
+    border-color: var(--form-element-border);
+    background-color: var(--form-element-bg);
+    color: var(--text-primary);
+    box-shadow: 0 0 0px 1px var(--apple-dark-border);
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+    border-color: var(--apple-dark-accent-color);
+    box-shadow: 0 0 0px 2px rgba(114, 114, 118, 0.5); /* 중립적인 회색 그림자 */
+}
+.btn-primary {
+    background-color: var(--button-primary-bg);
+    color: white; /* 버튼 텍스트는 대비를 위해 흰색 유지 */
+}
+.btn-primary:hover {
+    background-color: var(--button-primary-hover-bg);
+}
+.btn-secondary {
+    background-color: var(--button-secondary-bg);
+    color: var(--text-primary);
+}
+.btn-secondary:hover {
+    background-color: var(--button-secondary-hover-bg);
+}
+.btn-outline {
+    border-color: var(--button-outline-border);
+    color: var(--button-outline-text);
+    background-color: transparent;
+}
+.btn-outline:hover {
+    background-color: var(--button-outline-hover-bg);
+}
+.list-item {
+    background-color: var(--list-item-bg);
+    color: var(--text-primary);
+}
+.list-item:hover {
+    background-color: var(--list-item-hover-bg);
+}
+.list-item.active {
+    background-color: var(--list-item-active-bg);
+    color: var(--list-item-active-text);
+}
+.panel-form-container {
+    border-top: 1px solid var(--panel-list-border);
+}
+.panel-list-container {
+    border-bottom: 1px solid var(--panel-list-border);
+}
+@media (max-width: 768px) {
+    .content-area {
+        border-top: 1px solid var(--border-color);
+    }
+}
