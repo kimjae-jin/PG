@@ -1,0 +1,203 @@
+/* base.css: 테마와 무관한 공통 레이아웃 및 기본 스타일 */
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    /* 배경색과 텍스트 색상은 테마 CSS에서 정의 */
+}
+
+header {
+    padding: 1rem 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+    /* 배경색과 텍스트 색상은 테마 CSS에서 정의 */
+}
+
+header h1 {
+    color: inherit;
+}
+
+#darkModeToggle {
+    border: none;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    /* 배경색과 텍스트 색상은 테마 CSS에서 정의 */
+}
+
+.main-container {
+    display: flex;
+    flex: 1;
+}
+
+.sidebar {
+    width: 200px;
+    padding: 1rem;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    /* 배경색과 텍스트 색상은 테마 CSS에서 정의 */
+}
+
+.sidebar-button {
+    background: none;
+    border: none;
+    padding: 0.75rem 1rem;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.3s ease, font-weight 0.3s ease;
+    border-radius: 0.25rem;
+    margin-bottom: 0.5rem;
+    width: 100%;
+    /* 텍스트 색상은 테마 CSS에서 정의 */
+}
+
+.sidebar-button:hover {
+    /* 배경색은 테마 CSS에서 정의 */
+}
+
+.sidebar-button.active {
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    /* 배경색과 텍스트 색상은 테마 CSS에서 정의 */
+}
+
+.content-area {
+    flex: 1;
+    padding: 1.5rem;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    /* 배경색과 텍스트 색상은 테마 CSS에서 정의 */
+}
+
+/* 폼 요소 기본 스타일 (Tailwind CSS와 함께 사용) */
+.form-label {
+    @apply block text-sm font-medium mb-1;
+}
+.form-input, .form-select, .form-textarea {
+    @apply mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 sm:text-sm;
+    /* 경계선, 배경색, 텍스트 색상은 테마 CSS에서 정의 */
+    box-shadow: 0 0 0px 1px; /* 테마 색상으로 대체될 값 */
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+    /* 경계선, 그림자 색상은 테마 CSS에서 정의 */
+}
+
+/* 버튼 스타일 (Tailwind CSS와 함께 사용) */
+.btn-primary {
+    @apply px-4 py-2 font-medium rounded-md shadow-sm transition-colors duration-200;
+    /* 배경색과 텍스트 색상은 테마 CSS에서 정의 */
+}
+.btn-primary:hover {
+    /* 배경색은 테마 CSS에서 정의 */
+}
+
+.btn-secondary {
+    @apply px-4 py-2 font-medium rounded-md shadow-sm transition-colors duration-200;
+    /* 배경색과 텍스트 색상은 테마 CSS에서 정의 */
+}
+.btn-secondary:hover {
+    /* 배경색은 테마 CSS에서 정의 */
+}
+
+.btn-danger {
+    @apply px-4 py-2 bg-red-600 text-white font-medium rounded-md shadow-sm hover:bg-red-700 transition-colors duration-200;
+    /* 이 색상은 굳이 테마에 따라 바꾸지 않는 경우가 많으므로 여기에 둠 */
+}
+
+.btn-outline {
+    @apply px-4 py-2 border font-medium rounded-md shadow-sm transition-colors duration-200;
+    /* 경계선, 텍스트, 배경색은 테마 CSS에서 정의 */
+}
+.btn-outline:hover {
+    /* 배경색은 테마 CSS에서 정의 */
+}
+
+/* 리스트 항목 스타일 (Tailwind CSS와 함께 사용) */
+.list-item {
+    @apply p-3 rounded-md cursor-pointer transition duration-200 shadow-sm;
+    /* 배경색과 텍스트 색상은 테마 CSS에서 정의 */
+}
+.list-item:hover {
+    /* 배경색은 테마 CSS에서 정의 */
+}
+.list-item.active {
+    font-weight: bold;
+    /* 배경색과 텍스트 색상은 테마 CSS에서 정의 */
+}
+
+/* 각 패널의 내부 구조 */
+.panel-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+.panel-list-container {
+    flex: 1;
+    overflow-y: auto;
+}
+.panel-form-container {
+    padding-top: 1.5rem;
+    /* 경계선과 마진은 테마 CSS에서 정의 */
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .main-container {
+        flex-direction: column;
+    }
+    .sidebar {
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-around;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        padding: 0.5rem;
+    }
+    .sidebar-button {
+        width: auto;
+        margin-bottom: 0;
+        margin-right: 0.5rem;
+    }
+    .content-area {
+        padding: 1rem;
+        border-left: none;
+        /* border-top 색상은 테마 CSS에서 정의 */
+    }
+    .panel-content-wrapper {
+        flex-direction: column;
+    }
+    .panel-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .panel-header h3 {
+        margin-bottom: 0.5rem;
+    }
+    .panel-list-container {
+        padding-right: 0;
+        border-right: none;
+        border-bottom: none;
+        padding-bottom: 0;
+        margin-bottom: 0;
+    }
+    .panel-form-container {
+        padding-left: 0;
+        padding-top: 1rem;
+        margin-top: 1rem;
+    }
+}

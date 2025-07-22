@@ -1,0 +1,171 @@
+/* themes/starbucks-theme.css: 스타벅스 테마 전용 스타일 (색상 변수 및 테마 의존적 스타일) */
+
+/* 스타벅스 컨셉 컬러 팔레트 (밝은 모드, 저채도) */
+:root {
+    --starbucks-green-light: #D4E9E2; /* 바디 배경, 가장 밝은 저채도 녹색 */
+    --starbucks-green-medium: #0A6B35; /* 사이드바 배경, 중간 녹색 */
+    --starbucks-green-dark: #00704A; /* 포인트 컬러, 활성 메뉴 강조 */
+    --starbucks-beige: #C8D7C8; /* 콘텐츠 영역 내부 배경 (저채도 녹색-베이지) */
+    --text-primary: #333; /* 기본 텍스트 색상 */
+    --text-secondary: #666; /* 보조 텍스트 색상 */
+    --border-color: #A0A0A0; /* 경계선 색상 (더욱 저채도 그레이) */
+
+    /* 요소별 색상 변수 - 밝은 모드 */
+    --main-bg: var(--starbucks-green-light);
+    --header-bg: var(--starbucks-green-medium); /* 헤더 배경을 사이드바와 동일하게 */
+    --header-text: white;
+    --toggle-bg: rgba(150, 150, 150, 0.2); /* 저채도 그레이 투명 */
+    --toggle-text: #E0E0E0; /* 밝은 그레이 */
+    --sidebar-bg: var(--starbucks-green-medium);
+    --sidebar-text: white;
+    --sidebar-hover-bg: rgba(255, 255, 255, 0.15);
+    --sidebar-active-bg: var(--starbucks-green-dark);
+    --content-bg: var(--starbucks-beige); /* 저채도 녹색-베이지 */
+    --panel-list-border: var(--border-color);
+    --list-item-bg: #E0EFE0; /* 저채도 녹색 */
+    --list-item-hover-bg: #D0E0D0; /* 저채도 녹색 호버 */
+    --list-item-active-bg: #B0C0B0; /* 저채도 녹색 활성 */
+    --list-item-active-text: var(--starbucks-green-dark);
+    --form-element-bg: var(--list-item-bg);
+    --form-element-border: var(--border-color);
+    --button-primary-bg: var(--starbucks-green-dark);
+    --button-primary-hover-bg: #00563c;
+    --button-secondary-bg: #E0E0E0;
+    --button-secondary-hover-bg: #ccc;
+    --button-outline-border: var(--starbucks-green-dark);
+    --button-outline-text: var(--starbucks-green-dark);
+    --button-outline-hover-bg: var(--starbucks-green-light);
+}
+
+/* 다크 모드 컬러 팔레트 (저채도) */
+.dark {
+    --starbucks-green-light: #1A302A; /* 다크 모드 바디 배경 (어두운 저채도 녹색) */
+    --starbucks-green-medium: #004D33; /* 다크 모드 사이드바 배경 (더 어두운 저채도 녹색) */
+    --starbucks-green-dark: #00704A; /* 다크 모드 포인트 컬러 (유지 또는 약간 조정) */
+    --starbucks-beige: #202020; /* 다크 모드 콘텐츠 영역 내부 배경 (어두운 그레이) */
+    --text-primary: #eee; /* 다크 모드 기본 텍스트 */
+    --text-secondary: #ccc; /* 다크 모드 보조 텍스트 */
+    --border-color: #555; /* 다크 모드 경계선 (더 어두운 그레이) */
+
+    /* 요소별 색상 변수 - 다크 모드 */
+    --main-bg: var(--starbucks-green-light);
+    --header-bg: var(--starbucks-green-medium); /* 헤더 배경을 사이드바와 동일하게 */
+    --header-text: #eee;
+    --toggle-bg: rgba(50, 50, 50, 0.2); /* 어두운 그레이 투명 */
+    --toggle-text: #B0B0B0; /* 어두운 밝은 그레이 */
+    --sidebar-bg: var(--starbucks-green-medium);
+    --sidebar-text: #eee;
+    --sidebar-hover-bg: rgba(0, 0, 0, 0.2);
+    --sidebar-active-bg: #00563C;
+    --content-bg: var(--starbucks-beige); /* 어두운 그레이 */
+    --panel-list-border: var(--border-color);
+    --list-item-bg: #303030; /* 어두운 그레이 */
+    --list-item-hover-bg: #404040; /* 어두운 그레이 호버 */
+    --list-item-active-bg: #00402b; /* 어두운 녹색 활성 */
+    --list-item-active-text: white;
+    --form-element-bg: var(--list-item-bg);
+    --form-element-border: var(--border-color);
+    --button-primary-bg: #00563c;
+    --button-primary-hover-bg: #00402b;
+    --button-secondary-bg: #555;
+    --button-secondary-hover-bg: #666;
+    --button-outline-border: var(--starbucks-green-medium);
+    --button-outline-text: var(--starbucks-green-medium);
+    --button-outline-hover-bg: rgba(255,255,255,0.1);
+}
+
+/* 테마 의존적인 요소 스타일 적용 (여기에 정의된 변수 사용) */
+body {
+    background-color: var(--main-bg);
+    color: var(--text-primary);
+}
+header {
+    background-color: var(--header-bg);
+    color: var(--header-text);
+}
+#darkModeToggle {
+    background-color: var(--toggle-bg);
+    color: var(--toggle-text);
+}
+#darkModeToggle:hover {
+    /* 기존 스타일 유지 */
+}
+.dark #darkModeToggle:hover {
+    /* 기존 스타일 유지 */
+}
+.sidebar {
+    background-color: var(--sidebar-bg);
+    color: var(--sidebar-text);
+}
+.sidebar-button {
+    color: var(--sidebar-text);
+}
+.sidebar-button:hover {
+    background-color: var(--sidebar-hover-bg);
+}
+.sidebar-button.active {
+    background-color: var(--sidebar-active-bg);
+    color: var(--sidebar-active-text); /* 활성 버튼 텍스트 색상 */
+}
+.content-area {
+    background-color: var(--content-bg);
+    color: var(--text-primary);
+}
+.form-input, .form-select, .form-textarea {
+    border-color: var(--form-element-border);
+    background-color: var(--form-element-bg);
+    color: var(--text-primary);
+    box-shadow: 0 0 0px 1px var(--starbucks-green-dark); /* 테마 색상 변수 사용 */
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+    border-color: var(--starbucks-green-dark);
+    box-shadow: 0 0 0px 2px rgba(0, 112, 74, 0.5);
+}
+.btn-primary {
+    background-color: var(--button-primary-bg);
+    color: white;
+}
+.btn-primary:hover {
+    background-color: var(--button-primary-hover-bg);
+}
+.btn-secondary {
+    background-color: var(--button-secondary-bg);
+    color: var(--text-primary);
+}
+.btn-secondary:hover {
+    background-color: var(--button-secondary-hover-bg);
+}
+.btn-outline {
+    border-color: var(--button-outline-border);
+    color: var(--button-outline-text);
+    background-color: transparent;
+}
+.btn-outline:hover {
+    background-color: var(--button-outline-hover-bg);
+}
+.list-item {
+    background-color: var(--list-item-bg);
+    color: var(--text-primary);
+}
+.list-item:hover {
+    background-color: var(--list-item-hover-bg);
+}
+.list-item.active {
+    background-color: var(--list-item-active-bg);
+    color: var(--list-item-active-text);
+}
+.panel-form-container {
+    border-top: 1px solid var(--panel-list-border);
+}
+.panel-list-container {
+    /* 필요한 경우 여기에 목록 컨테이너의 테마별 스타일 추가 */
+    border-bottom: 1px solid var(--panel-list-border); /* 하단 구분선 추가 */
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+/* 반응형 디자인에서 테마 의존적인 border-top 색상 */
+@media (max-width: 768px) {
+    .content-area {
+        border-top: 1px solid var(--border-color);
+    }
+}

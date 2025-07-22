@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ko" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PG</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="base.css"> <link rel="stylesheet" id="theme-stylesheet" href="themes/starbucks-theme.css"> </head>
+<body class="min-h-screen flex flex-col">
+    <header>
+        <h1 class="text-xl font-semibold">PG</h1>
+        <button id="darkModeToggle">🌙</button>
+    </header>
+
+    <div class="main-container">
+        <aside class="sidebar">
+            <button id="projectTabBtn" class="sidebar-button">프로젝트</button>
+            <button id="engineerTabBtn" class="sidebar-button active">기술인</button>
+            <button id="businessLicenseTabBtn" class="sidebar-button">업면허</button>
+            <button id="weeklyMeetingTabBtn" class="sidebar-button">주간회의</button>
+        </aside>
+        <main class="content-area">
+            <div id="projectPanel" class="hidden h-full"></div>
+            <div id="engineerPanel" class="hidden h-full"></div>
+            <div id="businessLicensePanel" class="hidden h-full"></div>
+            <div id="weeklyMeetingPanel" class="hidden h-full"></div>
+        </main>
+    </div>
+
+    <script type="module" src="data.js"></script>
+    <script type="module" src="storage.js"></script>
+    <script type="module" src="components.js"></script>
+    <script type="module" src="main.js"></script>
+</body>
+</html>
