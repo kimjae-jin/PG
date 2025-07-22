@@ -6,6 +6,19 @@ import { engineers, projects, businessLicenses, weeklyMeetings,
 import { saveAllData, loadAllData } from './storage.js';
 import { renderEngineerContent, renderProjectContent, renderBusinessLicenseContent, renderWeeklyMeetingContent, renderThemeContent, updateComponentData } from './components.js';
 
+// renderHomeContent 함수를 main.js 내부에 직접 정의
+function renderHomeContent() {
+    const homePanel = document.getElementById('homePanel');
+    if (homePanel) {
+        homePanel.innerHTML = `
+            <div style="display: flex; justify-content: center; align-items: center; height: 100%; font-size: 2em; font-weight: bold; color: #333; background-color: #f0f2f5;">
+                Coming Soon! (추후 공개예정)
+            </div>
+        `;
+    }
+}
+
+
 document.addEventListener('DOMContentLoaded', () => {
     // 1. 데이터 로드 (가장 먼저 수행)
     loadAllData();
@@ -37,22 +50,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 3. 사이드바 메뉴 전환 로직
+    const pgHomeBtn = document.getElementById('pgHomeBtn'); // PG 헤더 버튼
     const projectTabBtn = document.getElementById('projectTabBtn');
     const engineerTabBtn = document.getElementById('engineerTabBtn');
     const businessLicenseTabBtn = document.getElementById('businessLicenseTabBtn');
     const weeklyMeetingTabBtn = document.getElementById('weeklyMeetingTabBtn');
     const themeTabBtn = document.getElementById('themeTabBtn');
 
+    const homePanel = document.getElementById('homePanel'); // 홈 패널
     const projectPanel = document.getElementById('projectPanel');
     const engineerPanel = document.getElementById('engineerPanel');
     const businessLicensePanel = document.getElementById('businessLicensePanel');
     const weeklyMeetingPanel = document.getElementById('weeklyMeetingPanel');
     const themePanel = document.getElementById('themePanel');
 
+    // 사이드바 버튼 목록 (PG 헤더는 포함하지 않음)
     const sidebarButtons = [projectTabBtn, engineerTabBtn, businessLicenseTabBtn, weeklyMeetingTabBtn, themeTabBtn];
-    const contentPanels = [projectPanel, engineerPanel, businessLicensePanel, weeklyMeetingPanel, themePanel];
+    // 콘텐츠 패널 목록에 homePanel 추가
+    const contentPanels = [homePanel, projectPanel, engineerPanel, businessLicensePanel, weeklyMeetingPanel, themePanel];
 
-    function switchPanel(activePanelElement, activeTabButton) {
+    function switchPanel(activePanelElement, activeTabButton = null) { // activeTabButton을 선택적으로 만듦
         // 모든 패널 숨기기
         contentPanels.forEach(panel => panel.classList.add('hidden'));
         // 모든 사이드바 버튼의 'active' 클래스 제거
@@ -60,11 +77,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 선택된 패널 보이기
         activePanelElement.classList.remove('hidden');
-        // 선택된 버튼에 'active' 클래스 추가
-        activeTabButton.classList.add('active');
+        // 선택된 버튼에 'active' 클래스 추가 (null이 아닌 경우에만)
+        if (activeTabButton) {
+            activeTabButton.classList.add('active');
+        }
 
         // 각 패널에 맞는 콘텐츠 렌더링 함수 호출
-        if (activePanelElement.id === 'projectPanel') {
+        if (activePanelElement.id === 'homePanel') { // homePanel 처리
+            renderHomeContent();
+        } else if (activePanelElement.id === 'projectPanel') {
             renderProjectContent();
         } else if (activePanelElement.id === 'engineerPanel') {
             renderEngineerContent();
@@ -80,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('selectPascucciThemeBtn').addEventListener('click', () => setTheme('pascucci')); // 파스쿠찌 테마 버튼 추가
         }
 
-        // 마지막 활성 패널을 localStorage에 저장
+        // 마지막 활성 패널을 localStorage에 저장 (홈 패널로 이동했을 때도 저장)
         localStorage.setItem('activePanel', activePanelElement.id);
         saveAllData(); // 현재 상태 저장 (예: 현재 선택된 ID 등)
     }
@@ -93,27 +114,18 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log(`Theme set to: ${themeName}`);
     }
 
-    // 초기 로딩 시 마지막 활성 패널을 불러오거나 'engineerPanel'을 기본으로 설정
-    const lastActivePanelId = localStorage.getItem('activePanel');
-    let initialPanel = engineerPanel; // 기본값은 기술인 패널
-    let initialButton = engineerTabBtn;
+    // **** 가장 중요한 변경점: 초기 로딩 시 무조건 'homePanel'을 기본으로 설정합니다. ****
+    // localStorage의 이전 값에 관계없이 항상 홈 패널로 시작합니다.
+    const initialPanel = homePanel;
+    const initialButton = null; // 초기에는 어떤 사이드바 버튼도 활성화되지 않음
 
-    // 만약 저장된 패널이 유효하면 해당 패널로 설정
-    if (lastActivePanelId === 'projectPanel' && projectPanel) {
-        initialPanel = projectPanel;
-        initialButton = projectTabBtn;
-    } else if (lastActivePanelId === 'businessLicensePanel' && businessLicensePanel) {
-        initialPanel = businessLicensePanel;
-        initialButton = businessLicenseTabBtn;
-    } else if (lastActivePanelId === 'weeklyMeetingPanel' && weeklyMeetingPanel) {
-        initialPanel = weeklyMeetingPanel;
-        initialButton = weeklyMeetingTabBtn;
-    } else if (lastActivePanelId === 'themePanel' && themePanel) {
-        initialPanel = themePanel;
-        initialButton = themeTabBtn;
-    }
     // 초기 패널 활성화
     switchPanel(initialPanel, initialButton);
+
+    // 페이지가 로드될 때마다 localStorage에 저장된 마지막 활성 패널 정보를 제거
+    // 이렇게 하면 새로고침하거나 다시 접속할 때 항상 홈으로 시작하게 됩니다.
+    localStorage.removeItem('activePanel');
+
 
     // 초기 로딩 시 저장된 테마 불러와 적용
     const savedTheme = localStorage.getItem('activeTheme');
@@ -123,6 +135,13 @@ document.addEventListener('DOMContentLoaded', () => {
         setTheme('starbucks'); // 기본 테마 설정
     }
 
+    // PG 헤더 클릭 이벤트 리스너 추가 (홈으로 바로가기)
+    if (pgHomeBtn) {
+        pgHomeBtn.addEventListener('click', () => {
+            switchPanel(homePanel, null); // 홈으로 이동 시 사이드바 버튼 활성화 안 함
+            localStorage.removeItem('activePanel'); // 로컬 스토리지에서 마지막 활성 패널 제거하여 항상 홈으로 시작하도록
+        });
+    }
 
     // 사이드바 버튼 클릭 이벤트 리스너
     projectTabBtn.addEventListener('click', () => switchPanel(projectPanel, projectTabBtn));
