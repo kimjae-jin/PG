@@ -160,7 +160,7 @@ export function renderThemeContent() {
                 <div class="flex flex-col space-y-4">
                     <button id="selectStarbucksThemeBtn" class="btn-primary">스타벅스 테마 적용</button>
                     <button id="selectAppleThemeBtn" class="btn-primary">애플 테마 적용</button>
-                </div>
+                    <button id="selectPascucciThemeBtn" class="btn-primary">파스쿠찌 테마 적용</button> </div>
             </div>
         `;
     }

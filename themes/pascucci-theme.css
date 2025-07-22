@@ -1,0 +1,178 @@
+/* themes/pascucci-theme.css: 파스쿠찌 테마 전용 스타일 (공식 웹사이트 UI 컨셉 최종 반영) */
+
+/* 파스쿠찌 컨셉 컬러 팔레트 (공식 웹사이트 UI 기반) */
+:root {
+    /* 밝은 모드 (웹사이트의 따뜻한 베이지/아이보리, 차분한 브라운/블랙 강조) */
+    --pascucci-light-bg-primary: #F8F5EF; /* 바디 및 메인 배경 (따뜻한 아이보리/베이지) */
+    --pascucci-light-bg-secondary: #FFFFFF; /* 사이드바, 헤더, 패널 배경 (순수한 화이트) */
+    --pascucci-light-bg-tertiary: #EFEFEF; /* 리스트 아이템, 폼 요소 배경 (아주 밝은 그레이) */
+    --pascucci-light-text-primary: #333333; /* 기본 텍스트 (짙은 그레이/블랙) */
+    --pascucci-light-text-secondary: #666666; /* 보조 텍스트 (중간 그레이) */
+    --pascucci-accent-main: #5C3D2F; /* 메인 강조 색상: 짙은 커피 브라운 (버튼, 활성 메뉴 등) */
+    --pascucci-accent-secondary: #A08375; /* 보조 강조 색상: 중간 톤 브라운 */
+    --pascucci-border: #D8D8D8; /* 경계선 색상 (밝은 그레이) */
+    --pascucci-shadow: rgba(0, 0, 0, 0.1); /* 그림자 색상 */
+
+    /* 요소별 색상 변수 - 밝은 모드 */
+    --main-bg: var(--pascucci-light-bg-primary);
+    --header-bg: var(--pascucci-light-bg-secondary);
+    --header-text: var(--pascucci-light-text-primary);
+    --toggle-bg: rgba(0, 0, 0, 0.05);
+    --toggle-text: var(--pascucci-light-text-primary);
+    --sidebar-bg: var(--pascucci-light-bg-secondary);
+    --sidebar-text: var(--pascucci-light-text-primary);
+    --sidebar-hover-bg: rgba(0, 0, 0, 0.05);
+    --sidebar-active-bg: var(--pascucci-accent-main); /* 메인 강조색 (짙은 커피 브라운) */
+    --content-bg: var(--pascucci-light-bg-primary);
+    --panel-list-border: var(--pascucci-border);
+    --list-item-bg: var(--pascucci-light-bg-tertiary);
+    --list-item-hover-bg: #E0E0E0;
+    --list-item-active-bg: var(--pascucci-accent-main); /* 메인 강조색 */
+    --list-item-active-text: white; /* 활성 항목 텍스트는 대비를 위해 흰색 유지 */
+    --form-element-bg: var(--pascucci-light-bg-tertiary);
+    --form-element-border: var(--pascucci-border);
+    --button-primary-bg: var(--pascucci-accent-main); /* 메인 강조색 */
+    --button-primary-hover-bg: #4A3026; /* 더 어두운 브라운 */
+    --button-secondary-bg: var(--pascucci-light-bg-tertiary);
+    --button-secondary-hover-bg: #D0D0D0;
+    --button-outline-border: var(--pascucci-accent-main); /* 메인 강조색 */
+    --button-outline-text: var(--pascucci-accent-main); /* 메인 강조색 */
+    --button-outline-hover-bg: rgba(92, 61, 47, 0.1); /* 메인 강조색 투명 호버 */
+}
+
+/* 다크 모드 컬러 팔레트 (따뜻한 다크 브라운/블랙 기반) */
+.dark {
+    --pascucci-dark-bg-primary: #221C18; /* 바디 및 메인 배경 (아주 어두운 따뜻한 브라운) */
+    --pascucci-dark-bg-secondary: #332B25; /* 사이드바, 헤더, 패널 배경 (조금 밝은 따뜻한 브라운) */
+    --pascucci-dark-bg-tertiary: #443B34; /* 리스트 아이템, 폼 요소 배경 (더 밝은 따뜻한 브라운) */
+    --pascucci-dark-text-primary: #F0EDE5; /* 기본 텍스트 (밝은 베이지 화이트) */
+    --pascucci-dark-text-secondary: #C0BFBB; /* 보조 텍스트 (중간 베이지 그레이) */
+    --pascucci-accent-main: #B5001E; /* 다크 모드에서는 로고 레드를 포인트로 활용 (대비 강조) */
+    --pascucci-accent-secondary: #D9AE9D; /* 보조 강조 색상: 밝은 핑크 베이지 */
+    --pascucci-border: #605C55; /* 경계선 색상 (어두운 브라운) */
+    --pascucci-shadow: rgba(0, 0, 0, 0.7); /* 그림자 색상 */
+
+    /* 요소별 색상 변수 - 다크 모드 */
+    --main-bg: var(--pascucci-dark-bg-primary);
+    --header-bg: var(--pascucci-dark-bg-secondary);
+    --header-text: var(--pascucci-dark-text-primary);
+    --toggle-bg: rgba(255, 255, 255, 0.1);
+    --toggle-text: var(--pascucci-dark-text-primary);
+    --sidebar-bg: var(--pascucci-dark-bg-secondary);
+    --sidebar-text: var(--pascucci-dark-text-primary);
+    --sidebar-hover-bg: rgba(255, 255, 255, 0.1);
+    --sidebar-active-bg: var(--pascucci-accent-main); /* 다크 모드에서는 로고 레드를 강조 */
+    --content-bg: var(--pascucci-dark-bg-primary);
+    --panel-list-border: var(--pascucci-border);
+    --list-item-bg: var(--pascucci-dark-bg-tertiary);
+    --list-item-hover-bg: #5A5650;
+    --list-item-active-bg: var(--pascucci-accent-main); /* 다크 모드 강조색 */
+    --list-item-active-text: white;
+    --form-element-bg: var(--pascucci-dark-bg-tertiary);
+    --form-element-border: var(--pascucci-border);
+    --button-primary-bg: var(--pascucci-accent-main);
+    --button-primary-hover-bg: #9C001A;
+    --button-secondary-bg: var(--pascucci-border);
+    --button-secondary-hover-bg: #706C65;
+    --button-outline-border: var(--pascucci-accent-main);
+    --button-outline-text: var(--pascucci-accent-main);
+    --button-outline-hover-bg: rgba(181, 0, 30, 0.1);
+}
+
+/* 테마 의존적인 요소 스타일 적용 (여기에 정의된 변수 사용) */
+body {
+    background-color: var(--main-bg);
+    color: var(--text-primary);
+}
+header {
+    background-color: var(--header-bg);
+    color: var(--header-text);
+    box-shadow: 0 2px 4px var(--pascucci-shadow);
+}
+#darkModeToggle {
+    background-color: var(--toggle-bg);
+    color: var(--toggle-text);
+}
+.sidebar {
+    background-color: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    box-shadow: 2px 0 5px var(--pascucci-shadow);
+}
+.sidebar-button {
+    color: var(--sidebar-text);
+}
+.sidebar-button:hover {
+    background-color: var(--sidebar-hover-bg);
+}
+.sidebar-button.active {
+    background-color: var(--sidebar-active-bg);
+    color: var(--list-item-active-text);
+}
+.content-area {
+    background-color: var(--content-bg);
+    color: var(--text-primary);
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+}
+.form-label {
+    color: var(--text-primary);
+}
+.form-input, .form-select, .form-textarea {
+    border-color: var(--form-element-border);
+    background-color: var(--form-element-bg);
+    color: var(--text-primary);
+    box-shadow: 0 0 0px 1px var(--pascucci-border);
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+    border-color: var(--button-primary-bg);
+    box-shadow: 0 0 0px 2px rgba(92, 61, 47, 0.5); /* 밝은 모드는 브라운 강조 */
+}
+.dark .form-input:focus, .dark .form-select:focus, .dark .form-textarea:focus {
+    box-shadow: 0 0 0px 2px rgba(181, 0, 30, 0.5); /* 다크 모드는 로고 레드 강조 */
+}
+.btn-primary {
+    background-color: var(--button-primary-bg);
+    color: white;
+}
+.btn-primary:hover {
+    background-color: var(--button-primary-hover-bg);
+}
+.btn-secondary {
+    background-color: var(--button-secondary-bg);
+    color: var(--text-primary);
+}
+.btn-secondary:hover {
+    background-color: var(--button-secondary-hover-bg);
+}
+.btn-danger {
+    /* 기존 Red 유지 - 필요시 파스쿠찌 레드와 다르게 설정 가능 */
+}
+.btn-outline {
+    border-color: var(--button-outline-border);
+    color: var(--button-outline-text);
+    background-color: transparent;
+}
+.btn-outline:hover {
+    background-color: var(--button-outline-hover-bg);
+}
+.list-item {
+    background-color: var(--list-item-bg);
+    color: var(--text-primary);
+}
+.list-item:hover {
+    background-color: var(--list-item-hover-bg);
+}
+.list-item.active {
+    background-color: var(--list-item-active-bg);
+    color: var(--list-item-active-text);
+}
+.panel-form-container {
+    border-top: 1px solid var(--panel-list-border);
+}
+.panel-list-container {
+    border-bottom: 1px solid var(--panel-list-border);
+}
+@media (max-width: 768px) {
+    .content-area {
+        border-top: 1px solid var(--border-color);
+    }
+}

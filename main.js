@@ -41,16 +41,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const engineerTabBtn = document.getElementById('engineerTabBtn');
     const businessLicenseTabBtn = document.getElementById('businessLicenseTabBtn');
     const weeklyMeetingTabBtn = document.getElementById('weeklyMeetingTabBtn');
-    const themeTabBtn = document.getElementById('themeTabBtn'); // 테마 버튼 추가
+    const themeTabBtn = document.getElementById('themeTabBtn');
 
     const projectPanel = document.getElementById('projectPanel');
     const engineerPanel = document.getElementById('engineerPanel');
     const businessLicensePanel = document.getElementById('businessLicensePanel');
     const weeklyMeetingPanel = document.getElementById('weeklyMeetingPanel');
-    const themePanel = document.getElementById('themePanel'); // 테마 패널 추가
+    const themePanel = document.getElementById('themePanel');
 
-    const sidebarButtons = [projectTabBtn, engineerTabBtn, businessLicenseTabBtn, weeklyMeetingTabBtn, themeTabBtn]; // 테마 버튼 포함
-    const contentPanels = [projectPanel, engineerPanel, businessLicensePanel, weeklyMeetingPanel, themePanel]; // 테마 패널 포함
+    const sidebarButtons = [projectTabBtn, engineerTabBtn, businessLicenseTabBtn, weeklyMeetingTabBtn, themeTabBtn];
+    const contentPanels = [projectPanel, engineerPanel, businessLicensePanel, weeklyMeetingPanel, themePanel];
 
     function switchPanel(activePanelElement, activeTabButton) {
         // 모든 패널 숨기기
@@ -72,11 +72,12 @@ document.addEventListener('DOMContentLoaded', () => {
             renderBusinessLicenseContent();
         } else if (activePanelElement.id === 'weeklyMeetingPanel') {
             renderWeeklyMeetingContent();
-        } else if (activePanelElement.id === 'themePanel') { // 테마 패널 렌더링
+        } else if (activePanelElement.id === 'themePanel') {
             renderThemeContent();
             // 테마 선택 버튼에 이벤트 리스너 추가 (패널 렌더링 후)
             document.getElementById('selectStarbucksThemeBtn').addEventListener('click', () => setTheme('starbucks'));
             document.getElementById('selectAppleThemeBtn').addEventListener('click', () => setTheme('apple'));
+            document.getElementById('selectPascucciThemeBtn').addEventListener('click', () => setTheme('pascucci')); // 파스쿠찌 테마 버튼 추가
         }
 
         // 마지막 활성 패널을 localStorage에 저장
@@ -107,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (lastActivePanelId === 'weeklyMeetingPanel' && weeklyMeetingPanel) {
         initialPanel = weeklyMeetingPanel;
         initialButton = weeklyMeetingTabBtn;
-    } else if (lastActivePanelId === 'themePanel' && themePanel) { // 테마 패널도 초기 로드 가능하도록
+    } else if (lastActivePanelId === 'themePanel' && themePanel) {
         initialPanel = themePanel;
         initialButton = themeTabBtn;
     }
@@ -128,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
     engineerTabBtn.addEventListener('click', () => switchPanel(engineerPanel, engineerTabBtn));
     businessLicenseTabBtn.addEventListener('click', () => switchPanel(businessLicensePanel, businessLicenseTabBtn));
     weeklyMeetingTabBtn.addEventListener('click', () => switchPanel(weeklyMeetingPanel, weeklyMeetingTabBtn));
-    themeTabBtn.addEventListener('click', () => switchPanel(themePanel, themeTabBtn)); // 테마 버튼 이벤트 리스너
+    themeTabBtn.addEventListener('click', () => switchPanel(themePanel, themeTabBtn));
 
     // 각 패널 내부에 있는 '추가' 버튼과 같은 동적으로 생성되는 요소에 대한 이벤트는
     // 해당 컴포넌트 렌더링 함수 (예: renderEngineerContent) 내에서 처리해야 합니다.
