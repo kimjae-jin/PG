@@ -1,0 +1,13 @@
+@tailwind base; @tailwind components; @tailwind utilities;
+@layer base {
+    body { background-color: var(--main-bg); color: var(--text-primary); }
+    header { background-color: var(--header-bg); color: var(--header-text); }
+    aside.sidebar { background-color: var(--sidebar-bg); }
+    main.content-area { background-color: var(--content-bg); }
+}
+@layer components {
+    .sidebar-button:hover { background-color: var(--sidebar-hover-bg); }
+    .sidebar-button.active { background-color: var(--sidebar-active-bg); color: var(--sidebar-active-text); font-weight: 600; }
+    .btn-primary { @apply py-2 px-4 rounded-md font-semibold text-white shadow-sm transition-colors; background-color: var(--button-primary-bg); }
+    .btn-primary:hover { background-color: var(--button-primary-hover-bg); }
+}

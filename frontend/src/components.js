@@ -1,0 +1,95 @@
+// --- 유틸리티 함수 ---
+function formatDate(d, displayFormat = false) {
+    if (!d) return '';
+    const date = new Date(d);
+    if (isNaN(date.getTime())) return '';
+    if (displayFormat) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}.${month}.${day}.`;
+    } else {
+        return date.toISOString().split('T')[0];
+    }
+}
+
+function formatNumber(n) {
+    return n != null ? Number(n).toLocaleString('ko-KR') : '0';
+}
+
+// --- 메인 컨텐츠 렌더링 함수들 ---
+export function renderHomeContent(container) {
+    container.innerHTML = `
+        <div class="h-full flex flex-col justify-center items-center text-center">
+            <h1 class="text-4xl font-bold mb-4" style="color: var(--header-text)">Project 'Aircraft Carrier'</h1>
+            <p class="text-lg" style="color: var(--header-text)">좌측 메뉴를 선택하여 항해를 시작하십시오.</p>
+        </div>
+    `;
+}
+
+export function renderProjectContent(container, projects) {
+    container.innerHTML = `
+        <div class="h-full flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-200">프로젝트 목록</h3>
+            </div>
+            <div class="flex-grow overflow-y-auto">
+                <ul id="projectList" class="space-y-2"></ul>
+            </div>
+        </div>
+    `;
+}
+
+export function renderProjectList(projects) {
+    const listEl = document.getElementById('projectList');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+    if (!projects || projects.length === 0) {
+        listEl.innerHTML = `<li class="p-4 text-center text-gray-500 dark:text-gray-400">등록된 프로젝트가 없습니다.</li>`;
+    } else {
+        projects.forEach(item => {
+            const li = document.createElement('li');
+            li.dataset.id = item.projectid;
+            li.className = 'list-item p-4 border rounded-md cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700';
+            li.innerHTML = `
+                <div class="flex justify-between items-center">
+                    <p class="font-bold text-lg">${item.projectname}</p>
+                    <span class="text-sm font-semibold px-2 py-1 rounded-full ${item.status === '완료' || item.status === '종료' ? 'bg-gray-200 text-gray-800' : 'bg-blue-200 text-blue-800'}">
+                        ${item.status}
+                    </span>
+                </div>
+                <p class="text-sm text-gray-500 mt-1">${item.clientname || '계약자 정보 없음'}</p>
+            `;
+            listEl.appendChild(li);
+        });
+    }
+}
+
+export function renderClientsContent(container) {
+    container.innerHTML = `<div class="p-4"><h3 class="text-2xl font-bold">관계사 (준비중)</h3></div>`;
+}
+
+export function renderEngineerContent(container) {
+    container.innerHTML = `<div class="p-4"><h3 class="text-2xl font-bold">기술인 (준비중)</h3></div>`;
+}
+
+export function renderBusinessLicenseContent(container) {
+    container.innerHTML = `<div class="p-4"><h3 class="text-2xl font-bold">업면허 (준비중)</h3></div>`;
+}
+
+export function renderWeeklyMeetingContent(container) {
+    container.innerHTML = `<div class="p-4"><h3 class="text-2xl font-bold">주간회의 (준비중)</h3></div>`;
+}
+
+export function renderThemeContent(container) {
+    container.innerHTML = `
+        <div class="p-4">
+            <h3 class="text-2xl font-bold mb-4">테마 선택</h3>
+            <div class="flex flex-col space-y-4">
+                <button id="selectStarbucksThemeBtn" class="btn-primary">스타벅스</button>
+                <button id="selectAppleThemeBtn" class="btn-primary">애플</button>
+                <button id="selectPascucciThemeBtn" class="btn-primary">파스쿠찌</button>
+            </div>
+        </div>
+    `;
+}
