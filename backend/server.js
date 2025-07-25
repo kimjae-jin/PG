@@ -6,18 +6,31 @@ const app = express();
 const PORT = 4000;
 
 app.use(cors());
-app.use(express.json()); // JSON 요청 본문을 파싱하기 위해 필수
+app.use(express.json());
 
-// --- 프로젝트 API ---
-
-// GET /api/projects : 모든 프로젝트 목록 조회 (계약 정보 포함)
+// GET /api/projects : 프로젝트 목록에 필요한 모든 필드를 올바른 테이블에서 JOIN하여 조회
 app.get('/api/projects', async (req, res) => {
     try {
-        // 프로젝트와 가장 최근의 계약 정보를 JOIN하여 함께 조회
         const query = `
-            SELECT p.*, c."contractDate", c."totalEquityAmount"
+            SELECT
+                p."projectId", 
+                p."projectName", 
+                p."projectCategory", 
+                p."pmName", 
+                p."projectLocation", 
+                p."status",
+                p."clientName",
+                c."contractId", 
+                c."contractDate", 
+                c."startDate", 
+                c."endDate", 
+                c."totalEquityAmount"
             FROM projects p
-            LEFT JOIN contracts c ON p."projectId" = c."projectId"
+            LEFT JOIN (
+                SELECT *, 
+                       ROW_NUMBER() OVER(PARTITION BY "projectId" ORDER BY "contractDate" DESC, "createdAt" DESC) as rn
+                FROM contracts
+            ) c ON p."projectId" = c."projectId" AND c.rn = 1
             ORDER BY p."status", c."contractDate" DESC, p."createdAt" DESC;
         `;
         const result = await pool.query(query);
@@ -35,14 +48,14 @@ app.post('/api/projects', async (req, res) => {
         await client.query('BEGIN'); // 트랜잭션 시작
 
         // 1. 프로젝트 생성
-        const { projectName, projectCategory, pmName, projectLocation, summary, facilityType, status } = req.body.project;
+        const { projectName, projectCategory, pmName, projectLocation, summary, facilityType, status, clientName } = req.body.project;
         if (!projectName) throw new Error("계약명은 필수 항목입니다.");
         
         const projectId = `P${new Date().getFullYear()}-${String(new Date().getTime()).slice(-6)}`;
         const projectResult = await client.query(
-            `INSERT INTO projects ("projectId", "projectName", "projectCategory", "pmName", "projectLocation", "summary", "facilityType", "status")
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-            [projectId, projectName, projectCategory, pmName, projectLocation, summary, facilityType, status || '준비중']
+            `INSERT INTO projects ("projectId", "projectName", "projectCategory", "pmName", "projectLocation", "summary", "facilityType", "status", "clientName")
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
+            [projectId, projectName, projectCategory, pmName, projectLocation, summary, facilityType, status || '준비중', clientName]
         );
         const newProject = projectResult.rows[0];
 
