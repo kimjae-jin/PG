@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* --- 테마 및 모드 변수 정의 --- */
+.dark[data-theme='pg-gray'] { --bg: #202124; --card: #303134; --border: #3c4043; --text: #e8eaed; --text-secondary: #9aa0a6; --accent: #8ab4f8; }
+.light[data-theme='pg-gray'] { --bg: #ffffff; --card: #f1f3f4; --border: #dadce0; --text: #202124; --text-secondary: #5f6368; --accent: #1a73e8; }
+/* (다른 테마들도 이와 같은 형식으로 추가) */
+
+/* --- 기본 스타일 --- */
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: system-ui, sans-serif;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+/* 사이드바 흑백 이모티콘 필터 */
+.sidebar-icon { filter: grayscale(100%) opacity(60%); transition: filter 0.2s; }
+a.active .sidebar-icon, a:hover .sidebar-icon { filter: grayscale(0%) opacity(100%); }
+
+/* 커스텀 스크롤바 */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
