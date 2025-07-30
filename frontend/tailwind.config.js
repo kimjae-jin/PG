@@ -5,13 +5,25 @@ export default {
   theme: {
     extend: {
       colors: {
-        'dark-bg': '#202124',
-        'dark-card': '#303134',
-        'dark-border': '#3c4043',
-        'dark-text': '#e8eaed',
-        'dark-text-secondary': '#9aa0a6',
-        'dark-accent': '#8ab4f8',
+        // 함장님 스크린샷 기반 정밀 컬러 스킴
+        'navy': {
+          'DEFAULT': '#1A202C', // 메인 배경
+          'light': '#2D3748',   // 사이드바, 카드 배경
+          'lighter': '#4A5568',  // 호버, 테이블 헤더
+          'dark': '#151A23',
+        },
+        'accent': {
+          'blue': '#4299E1',    // 활성 메뉴, 버튼
+          'green': '#48BB78',   // '진행중' 상태
+          'red': '#F56565',     // 잔액
+        },
       },
+      spacing: {
+        '18': '4.5rem',
+      },
+      fontSize: {
+        'xxs': '0.65rem',
+      }
     },
   },
   plugins: [],
