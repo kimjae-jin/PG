@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Outlet, NavLink, useLocation, Link, useOutletContext } from 'react-router-dom';
+import React, { useState, useEffect, useContext } from 'react';
+import { Outlet, NavLink, useLocation, Link } from 'react-router-dom';
+import ThemeContext from './contexts/ThemeContext';
 
 const menuItems = [
     { to: "/projects", icon: "📄", label: "프로젝트" },
@@ -36,7 +37,8 @@ const Sidebar = () => (
 );
 
 const Header = ({ breadcrumbData }) => {
-    // 다크모드 여부 판단 로직은 그대로 유지
+    const { mode, toggleMode, isModeSwitchable } = useContext(ThemeContext);
+
     return (
         <header className="flex justify-between items-center p-4 bg-header text-text-primary border-b border-border-primary h-16 flex-shrink-0">
             <div className="flex items-center space-x-2 text-sm">
@@ -54,29 +56,30 @@ const Header = ({ breadcrumbData }) => {
                 ))}
             </div>
             <div className="flex items-center space-x-4">
-                <button className="text-2xl">☀️</button>
+                <button
+                    onClick={toggleMode}
+                    disabled={!isModeSwitchable}
+                    className="text-2xl disabled:opacity-50 disabled:cursor-not-allowed"
+                    title={isModeSwitchable ? '라이트/다크 모드 전환' : '이 테마는 다크 모드만 지원합니다.'}
+                >
+                    {mode === 'dark' ? '☀️' : '🌙'}
+                </button>
                 <span>여니서방 님</span>
             </div>
         </header>
     );
 };
 
-const Footer = () => (
-    <footer className="text-center text-xs text-text-secondary p-2 bg-header border-t border-border-primary">
-        "The only way to do great work is to love what you do." - Steve Jobs
-    </footer>
-);
+// [핵심 수정] Footer 컴포넌트 정의를 완전히 삭제합니다.
 
 const App = () => {
     const [pageTitle, setPageTitle] = useState('');
     const location = useLocation();
 
     useEffect(() => {
-        // 페이지 이동 시 동적 제목 초기화
         setPageTitle('');
     }, [location.pathname]);
 
-    // 브레드크럼 데이터 생성 로직
     const pathnames = location.pathname.split('/').filter(Boolean);
     const breadcrumbData = [{ label: 'ERP', link: '/' }];
     
@@ -86,7 +89,6 @@ const App = () => {
             breadcrumbData.push({ label: pageTitle });
         }
     }
-    // 다른 경로에 대한 브레드크럼 로직 추가 가능
 
     return (
         <div className="flex h-screen">
@@ -96,7 +98,7 @@ const App = () => {
                 <main className="flex-1 p-6 overflow-y-auto">
                     <Outlet context={{ setPageTitle }} />
                 </main>
-                <Footer />
+                {/* [핵심 수정] <Footer /> 컴포넌트 호출부를 삭제합니다. */}
             </div>
         </div>
     );
