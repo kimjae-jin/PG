@@ -2,6 +2,7 @@
   "name": "pg-monorepo-v5.3",
   "version": "5.3.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "start": "npm-run-all --parallel start:backend start:frontend",
     "start:backend": "npm start --prefix backend",

@@ -5786,4 +5786,4 @@ export const projectsData = [
     "completion_date": null,
     "remarks": "정승문"
   }
-]
+];

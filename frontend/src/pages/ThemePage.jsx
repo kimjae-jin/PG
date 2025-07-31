@@ -1,47 +1,61 @@
-import React, { useContext } from 'react';
-import ThemeContext from '../contexts/ThemeContext';
+// frontend/src/pages/ThemePage.jsx
 
-const themes = [
-    { id: 'native', name: '네이티브 다크 (기본)' },
-    { id: 'apple', name: '애플 다크' },
-    { id: 'pascucci', name: '파스쿠찌' },
-    { id: 'starbucks', name: '스타벅스' },
-];
+import React, { useContext } from 'react';
+// [최종 수정] default export가 없으므로, 중괄호를 사용하여 명시적으로 ThemeContext를 import합니다.
+import { ThemeContext } from '../contexts/ThemeContext.jsx';
 
 const ThemePage = () => {
-    const { theme, setTheme } = useContext(ThemeContext);
+  const { theme, changeTheme, mode, toggleMode, isModeSwitchable } = useContext(ThemeContext);
 
-    return (
-        <div className="p-4">
-            <h1 className="text-2xl font-bold text-text-primary mb-6">테마 선택</h1>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {themes.map((t) => (
-                    <div key={t.id} className="bg-secondary p-6 rounded-lg shadow-lg">
-                        <h2 className="text-xl font-semibold text-text-primary mb-4">{t.name}</h2>
-                        <button
-                            onClick={() => setTheme(t.id)}
-                            disabled={theme === t.id}
-                            className={`w-full py-2 px-4 rounded font-bold transition-all
-                                ${theme === t.id
-                                    ? 'bg-tertiary text-text-secondary cursor-not-allowed'
-                                    : 'bg-accent-primary text-white hover:opacity-80'
-                                }`}
-                        >
-                            {theme === t.id ? '적용됨' : '이 테마 적용하기'}
-                        </button>
-                    </div>
-                ))}
-            </div>
-            <div className="mt-8 p-6 bg-secondary rounded-lg">
-                <h3 className="text-lg font-semibold text-text-primary mb-2">작동 원리</h3>
-                <p className="text-sm text-text-secondary">
-                    테마를 선택하면 해당 테마의 색상 변수(CSS Custom Properties)가 포함된 CSS 파일이 동적으로 로드됩니다.
-                    애플리케이션의 모든 컴포넌트는 이 변수를 참조하므로, 앱 전체의 색상이 즉시 변경됩니다.
-                    선택한 테마는 브라우저의 로컬 스토리지에 저장되어 다음에 방문할 때도 유지됩니다.
-                </p>
-            </div>
+  const themes = [
+    { id: 'native', name: '네이티브' },
+    { id: 'apple', name: '애플' },
+    { id: 'pascucci', name: '파스쿠찌' },
+    { id: 'starbucks', name: '스타벅스' },
+  ];
+
+  return (
+    <div className="p-4 md:p-8">
+      <h1 className="text-3xl font-bold text-text-color mb-6">테마 설정</h1>
+
+      <div className="bg-card-bg p-6 rounded-lg shadow-md">
+        <h2 className="text-xl font-semibold text-text-color mb-4">테마 선택</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {themes.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => changeTheme(t.id)}
+              className={`p-4 rounded-lg text-center font-semibold transition-all duration-200 border-2 ${
+                theme === t.id
+                  ? 'border-accent bg-accent text-white scale-105'
+                  : 'border-separator bg-tab-inactive hover:border-accent hover:text-accent'
+              }`}
+            >
+              {t.name}
+            </button>
+          ))}
         </div>
-    );
+      </div>
+
+      <div className="bg-card-bg p-6 rounded-lg shadow-md mt-8">
+        <h2 className="text-xl font-semibold text-text-color mb-4">모드 설정</h2>
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={toggleMode}
+            disabled={!isModeSwitchable}
+            className="px-4 py-2 rounded font-semibold bg-accent text-white disabled:bg-gray-500 disabled:cursor-not-allowed hover:bg-accent-hover transition-colors"
+          >
+            {mode === 'light' ? '다크 모드로 변경' : '라이트 모드로 변경'}
+          </button>
+          <span className="text-text-muted">
+            {isModeSwitchable
+              ? `현재 모드: ${mode === 'light' ? '라이트' : '다크'}`
+              : '현재 테마는 모드 변경을 지원하지 않습니다.'}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default ThemePage;

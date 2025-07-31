@@ -1,40 +1,44 @@
+// frontend/src/main.jsx
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { ThemeProvider } from './contexts/ThemeContext'; // [신규] import
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { ThemeProvider } from './contexts/ThemeContext.jsx';
 
 import App from './App.jsx';
 import HomePage from './pages/HomePage.jsx';
 import ProjectList from './pages/ProjectList.jsx';
 import ProjectDetail from './pages/ProjectDetail.jsx';
 import PlaceholderPage from './pages/PlaceholderPage.jsx';
-import ThemePage from './pages/ThemePage.jsx'; // [신규] import
+import ThemePage from './pages/ThemePage.jsx';
 
 import './App.css';
 
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <App />,
-    children: [
-      { index: true, element: <HomePage /> },
-      { path: "projects", element: <ProjectList /> },
-      { path: "projects/:projectId", element: <ProjectDetail /> },
-      { path: "technicians", element: <PlaceholderPage title="기술인" /> },
-      { path: "companies", element: <PlaceholderPage title="관계사" /> },
-      { path: "billing", element: <PlaceholderPage title="청구/입금" /> },
-      { path: "licenses", element: <PlaceholderPage title="업면허" /> },
-      { path: "meetings", element: <PlaceholderPage title="주간회의" /> },
-      // [수정] PlaceholderPage를 실제 ThemePage로 교체
-      { path: "theme", element: <ThemePage /> },
-    ],
-  },
-]);
+const root = ReactDOM.createRoot(document.getElementById('root'));
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+root.render(
   <React.StrictMode>
-    <ThemeProvider> {/* [신규] 앱 전체를 ThemeProvider로 감싸기 */}
-      <RouterProvider router={router} />
+    <ThemeProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<App />}>
+            <Route index element={<HomePage />} />
+            <Route path="projects" element={<ProjectList />} />
+            <Route path="projects/:id" element={<ProjectDetail />} />
+            <Route path="technicians" element={<PlaceholderPage title="기술인" />} />
+            <Route path="companies" element={<PlaceholderPage title="관계사" />} />
+            <Route path="billing" element={<PlaceholderPage title="청구/입금" />} />
+            <Route path="evaluation" element={<PlaceholderPage title="사업수행능력평가" />} />
+            <Route path="analysis" element={<PlaceholderPage title="입찰분석" />} />
+            <Route path="docs" element={<PlaceholderPage title="문서/서식" />} />
+            <Route path="licenses" element={<PlaceholderPage title="업/면허" />} />
+            <Route path="meetings" element={<PlaceholderPage title="주간회의" />} />
+            {/* [수정] "theme" 경로에 ThemePage 컴포넌트를 정확히 연결합니다. */}
+            <Route path="theme" element={<ThemePage />} />
+            <Route path="*" element={<PlaceholderPage title="페이지를 찾을 수 없습니다." />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
     </ThemeProvider>
   </React.StrictMode>
 );

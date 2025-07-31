@@ -1,63 +1,55 @@
-import React, { createContext, useState, useEffect, useMemo, useCallback } from 'react';
+// frontend/src/contexts/ThemeContext.jsx
 
-const ThemeContext = createContext();
+import React, { createContext, useState, useEffect } from 'react';
 
-// [핵심] 일부 테마는 라이트/다크 전환을 지원하지 않음
-const ALWAYS_DARK_THEMES = ['native', 'apple'];
+// ThemeContext를 명시적으로 export합니다. 다른 파일에서 import { ThemeContext }로 사용할 수 있습니다.
+export const ThemeContext = createContext();
 
+// ThemeProvider 컴포넌트를 명시적으로 export합니다. main.jsx에서 import { ThemeProvider }로 사용할 수 있습니다.
 export const ThemeProvider = ({ children }) => {
-    // 1. 테마 상태 관리
-    const [theme, setTheme] = useState(() => localStorage.getItem('app-theme') || 'native');
+  const [theme, setTheme] = useState(localStorage.getItem('app-theme') || 'native');
+  const [mode, setMode] = useState(localStorage.getItem('app-mode') || 'dark');
+  const [isModeSwitchable, setIsModeSwitchable] = useState(true);
 
-    // 2. 모드 상태 관리 (light/dark)
-    const [mode, setMode] = useState(() => {
-        const savedMode = localStorage.getItem('app-mode');
-        // 저장된 모드가 있으면 사용, 없으면 OS 설정을 따르거나 light를 기본값으로
-        return savedMode || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    });
+  useEffect(() => {
+    // 테마와 모드를 body 클래스에 적용하기 전에 기존 클래스를 초기화합니다.
+    document.body.className = ''; 
+    document.body.classList.add(theme, mode);
+    
+    // 변경된 테마와 모드를 로컬 스토리지에 저장합니다.
+    localStorage.setItem('app-theme', theme);
+    localStorage.setItem('app-mode', mode);
 
-    useEffect(() => {
-        // 테마 변경 시 처리
-        localStorage.setItem('app-theme', theme);
-        import(`../themes/${theme}-theme.css`);
+    // 각 테마가 라이트/다크 모드 전환을 지원하는지 여부를 설정합니다.
+    const themeConfig = {
+      native: true,
+      apple: true,
+      pascucci: true,
+      starbucks: false, // 스타벅스 테마는 다크 모드만 지원
+    };
+    setIsModeSwitchable(themeConfig[theme] === true);
 
-        // 네이티브/애플 테마는 항상 다크모드로 강제
-        if (ALWAYS_DARK_THEMES.includes(theme)) {
-            setMode('dark');
-        }
-    }, [theme]);
+  }, [theme, mode]);
 
-    useEffect(() => {
-        // 모드 변경 시 처리
-        const root = document.documentElement;
-        if (mode === 'dark') {
-            root.classList.add('dark');
-        } else {
-            root.classList.remove('dark');
-        }
-        localStorage.setItem('app-mode', mode);
-    }, [mode]);
+  // 모드를 전환하는 함수
+  const toggleMode = () => {
+    if (isModeSwitchable) {
+      setMode(prevMode => (prevMode === 'light' ? 'dark' : 'light'));
+    }
+  };
 
-    // 모드 전환 함수
-    const toggleMode = useCallback(() => {
-        // 항상 다크모드인 테마에서는 모드 전환 방지
-        if (ALWAYS_DARK_THEMES.includes(theme)) return;
-        setMode(prevMode => (prevMode === 'light' ? 'dark' : 'light'));
-    }, [theme]);
+  // 테마를 변경하는 함수
+  const changeTheme = (newTheme) => {
+    setTheme(newTheme);
+    // 스타벅스 테마로 변경 시, 강제로 다크 모드로 설정합니다.
+    if (newTheme === 'starbucks') {
+      setMode('dark');
+    }
+  };
 
-    const value = useMemo(() => ({
-        theme,
-        setTheme,
-        mode,
-        toggleMode,
-        isModeSwitchable: !ALWAYS_DARK_THEMES.includes(theme) // 모드 전환 가능 여부 전달
-    }), [theme, mode, toggleMode]);
-
-    return (
-        <ThemeContext.Provider value={value}>
-            {children}
-        </ThemeContext.Provider>
-    );
+  return (
+    <ThemeContext.Provider value={{ theme, mode, changeTheme, toggleMode, isModeSwitchable }}>
+      {children}
+    </ThemeContext.Provider>
+  );
 };
-
-export default ThemeContext;
