@@ -1,0 +1,14 @@
+/* Native Theme: 기존의 매트 블랙 테마 */
+:root {
+  --bg-primary: #1A202C;
+  --bg-secondary: #2D3748;
+  --bg-tertiary: #4A5568;
+  --bg-header: #151A23;
+  --text-primary: #FFFFFF;
+  --text-secondary: #A0AEC0;
+  --text-placeholder: #718096;
+  --accent-primary: #4299E1;
+  --accent-secondary: #48BB78;
+  --accent-danger: #F56565;
+  --border-primary: #4A5568;
+}

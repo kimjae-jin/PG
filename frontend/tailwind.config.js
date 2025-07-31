@@ -1,22 +1,25 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
-  darkMode: 'class',
+  darkMode: 'class', // 다크모드는 계속 지원
   theme: {
     extend: {
       colors: {
-        // 함장님 스크린샷 기반 정밀 컬러 스킴
-        'navy': {
-          'DEFAULT': '#1A202C', // 메인 배경
-          'light': '#2D3748',   // 사이드바, 카드 배경
-          'lighter': '#4A5568',  // 호버, 테이블 헤더
-          'dark': '#151A23',
-        },
-        'accent': {
-          'blue': '#4299E1',    // 활성 메뉴, 버튼
-          'green': '#48BB78',   // '진행중' 상태
-          'red': '#F56565',     // 잔액
-        },
+        // 이제 Tailwind는 하드코딩된 색상이 아닌 CSS 변수를 사용합니다.
+        'primary': 'var(--bg-primary)',
+        'secondary': 'var(--bg-secondary)',
+        'tertiary': 'var(--bg-tertiary)',
+        'header': 'var(--bg-header)',
+        
+        'text-primary': 'var(--text-primary)',
+        'text-secondary': 'var(--text-secondary)',
+        'text-placeholder': 'var(--text-placeholder)',
+        
+        'accent-primary': 'var(--accent-primary)',
+        'accent-secondary': 'var(--accent-secondary)',
+        'accent-danger': 'var(--accent-danger)',
+        
+        'border-primary': 'var(--border-primary)',
       },
       spacing: {
         '18': '4.5rem',

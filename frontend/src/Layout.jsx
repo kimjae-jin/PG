@@ -1,59 +1,79 @@
 import React from 'react';
-import { Outlet, NavLink } from 'react-router-dom';
+import { Outlet, NavLink, useLocation } from 'react-router-dom';
+
+const menuItems = [
+    { to: "/projects", icon: "📄", label: "프로젝트" },
+    { to: "/technicians", icon: "👥", label: "기술인" },
+    { to: "/companies", icon: "🏢", label: "관계사" },
+    { to: "/billing", icon: "💰", label: "청구/입금/세금" },
+    { to: "/analysis", icon: "📊", label: "입찰분석" },
+    { to: "/evaluation", icon: "📈", label: "사업수행능력평가" },
+    { to: "/licenses", icon: "📜", label: "업/면허" },
+    { to: "/docs", icon: "📁", label: "문서/서식" },
+    { to: "/meetings", icon: "📅", label: "주간회의" },
+    { to: "/management", icon: "견적관리", label: "견적관리" }, // 아이콘 임시 추가
+    { to: "/attendance", icon: "주간회의", label: "주간회의" }, // 아이콘 임시 추가
+];
 
 const Sidebar = () => (
-  <aside className="w-16 md:w-56 bg-gray-800 text-gray-300 flex flex-col border-r border-gray-700">
-    <div className="text-white font-bold text-2xl p-4 text-center">E</div>
-    <nav className="flex flex-col mt-4">
-      <NavLink to="/projects/1" className={({ isActive }) => `flex items-center p-4 ${isActive ? 'bg-blue-600 text-white' : 'hover:bg-gray-700'}`}>
-        <span className="md:mr-4 text-xl">📄</span> <span className="hidden md:inline">프로젝트</span>
-      </NavLink>
-      <NavLink to="/technicians/1" className={({ isActive }) => `flex items-center p-4 ${isActive ? 'bg-blue-600 text-white' : 'hover:bg-gray-700'}`}>
-        <span className="md:mr-4 text-xl">👥</span> <span className="hidden md:inline">기술인</span>
-      </NavLink>
-       <NavLink to="/companies" className={({ isActive }) => `flex items-center p-4 ${isActive ? 'bg-blue-600 text-white' : 'hover:bg-gray-700'}`}>
-        <span className="md:mr-4 text-xl">🏢</span> <span className="hidden md:inline">관계사</span>
-      </NavLink>
-       <NavLink to="/billing" className={({ isActive }) => `flex items-center p-4 ${isActive ? 'bg-blue-600 text-white' : 'hover:bg-gray-700'}`}>
-        <span className="md:mr-4 text-xl">💰</span> <span className="hidden md:inline">청구/입금</span>
-      </NavLink>
-    </nav>
-    <div className="mt-auto p-4">
-      <a href="#" className="flex items-center hover:bg-gray-700 p-2 rounded">
-        <span className="md:mr-4 text-xl">⚙️</span> <span className="hidden md:inline">설정</span>
-      </a>
-    </div>
-  </aside>
-);
-
-const Header = ({ breadcrumbs }) => (
-    <header className="flex justify-between items-center p-4 bg-gray-900 border-b border-gray-700">
-        <div>{breadcrumbs}</div>
-        <div className="flex items-center space-x-4">
-            <span>☀️</span>
-            <span>김재진 님</span>
+    <aside className="w-16 md:w-56 bg-navy-light text-gray-300 flex flex-col flex-shrink-0">
+        <div className="text-white font-bold text-3xl p-4 text-center h-16 flex items-center justify-center">E</div>
+        <nav className="flex flex-col mt-2 flex-grow overflow-y-auto">
+            {menuItems.map(item => (
+                <NavLink key={item.to} to={item.to} className={({ isActive }) => 
+                    `flex items-center p-4 hover:bg-navy-lighter transition-colors ${isActive ? 'bg-accent-blue text-white' : ''}`
+                }>
+                    <span className="text-2xl w-8 text-center">{item.icon}</span>
+                    <span className="hidden md:inline ml-3 whitespace-nowrap">{item.label}</span>
+                </NavLink>
+            ))}
+        </nav>
+        <div className="p-2 border-t border-navy-lighter">
+            <NavLink to="/theme" className="flex items-center p-4 hover:bg-navy-lighter transition-colors">
+                <span className="text-2xl w-8 text-center">🎨</span>
+                <span className="hidden md:inline ml-3 whitespace-nowrap">테마</span>
+            </NavLink>
         </div>
-    </header>
+    </aside>
 );
 
-const Layout = () => {
-  // 이 부분은 향후 React Router의 useMatches 등을 사용하여 동적으로 생성됩니다.
-  const breadcrumbs = <span className="text-sm">ERP / 프로젝트 / 서울시청 본관 리모델링</span>;
+const Header = () => {
+    // Breadcrumbs 로직 (향후 동적 처리 필요)
+    const location = useLocation();
+    // 이 부분은 더 정교한 라이브러리(ex: use-react-router-breadcrumbs)나 로직으로 개선될 수 있습니다.
+    const pathnames = location.pathname.split('/').filter(x => x);
+    const breadcrumbs = `ERP / ${pathnames.join(' / ')}`;
 
-  return (
-    <div className="flex h-screen">
-      <Sidebar />
-      <div className="flex-1 flex flex-col bg-gray-900">
-        <Header breadcrumbs={breadcrumbs} />
-        <main className="flex-1 p-6 overflow-y-auto">
-          <Outlet />
-        </main>
-        <footer className="text-center text-xs text-gray-500 p-2 bg-gray-800 border-t border-gray-700">
-          "The only way to do great work is to love what you do." - Steve Jobs
-        </footer>
-      </div>
-    </div>
-  );
+    return (
+        <header className="flex justify-between items-center p-4 bg-navy-dark text-gray-400 border-b border-navy-lighter h-16 flex-shrink-0">
+            <div>{breadcrumbs}</div>
+            <div className="flex items-center space-x-4">
+                <button className="text-2xl">☀️</button>
+                <span>여니서방 님</span>
+            </div>
+        </header>
+    );
 };
 
-export default Layout;
+const Footer = () => (
+    <footer className="text-center text-xs text-gray-500 p-2 bg-navy-dark border-t border-navy-lighter">
+        "The only way to do great work is to love what you do." - Steve Jobs
+    </footer>
+);
+
+const App = () => {
+    return (
+        <div className="flex h-screen bg-navy text-white">
+            <Sidebar />
+            <div className="flex-1 flex flex-col overflow-hidden">
+                <Header />
+                <main className="flex-1 p-6 overflow-y-auto">
+                    <Outlet />
+                </main>
+                <Footer />
+            </div>
+        </div>
+    );
+};
+
+export default App;
