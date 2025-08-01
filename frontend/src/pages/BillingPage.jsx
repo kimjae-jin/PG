@@ -53,22 +53,22 @@ const BillingPage = () => {
         {/* ... 필터 및 검색창 (이전과 동일) ... */}
       </div>
       
-      <div className="flex-grow overflow-y-auto bg-card-bg rounded-lg shadow">
+      <div className="flex-grow overflow-auto bg-card-bg rounded-lg shadow table-container">
         <table className="w-full text-sm text-left">
           <thead className="sticky top-0 bg-table-header text-table-header-text uppercase z-10">
             <tr className="divide-x divide-separator">
-              <th className="p-2 w-[5%] text-center h-12 flex items-center justify-center">상태</th>
-              <th className="p-2 w-[8%] text-center h-12 flex items-center justify-center">프로젝트 넘버</th>
-              <th className="p-2 w-[15%] h-12 flex items-center">계약명</th>
-              <th className="p-2 w-[15%] h-12 flex items-center">발주처</th>
-              <th className="p-2 w-[8%] text-right h-12 flex items-center justify-end"><div>총 계약</div><div>금액</div></th>
-              <th className="p-2 w-[8%] text-right h-12 flex items-center justify-end"><div>총 지분</div><div>금액</div></th>
-              <th className="p-2 w-[5%] text-center h-12 flex items-center justify-center">지분율</th>
-              <th className="p-2 w-[5%] text-center h-12 flex items-center justify-center">기성율</th>
-              <th className="p-2 w-[8%] text-right h-12 flex items-center justify-end">청구금액</th>
-              <th className="p-2 w-[8%] text-right h-12 flex items-center justify-end">입금금액</th>
-              <th className="p-2 w-[8%] text-right h-12 flex items-center justify-end">미수금액</th>
-              <th className="p-2 w-[7%] text-center h-12 flex items-center justify-center"><div>청구</div><div>횟수</div></th>
+              <th className="p-2 w-[5%] text-center align-middle">상태</th>
+              <th className="p-2 w-[8%] text-center align-middle">프로젝트 넘버</th>
+              <th className="p-2 w-[15%] align-middle">계약명</th>
+              <th className="p-2 w-[15%] align-middle">발주처</th>
+              <th className="p-2 w-[8%] text-right align-middle">총계약금액</th>
+              <th className="p-2 w-[8%] text-right align-middle">총지분금액</th>
+              <th className="p-2 w-[5%] text-center align-middle">지분율</th>
+              <th className="p-2 w-[5%] text-center align-middle">기성율</th>
+              <th className="p-2 w-[8%] text-right align-middle">청구금액</th>
+              <th className="p-2 w-[8%] text-right align-middle">입금금액</th>
+              <th className="p-2 w-[8%] text-right align-middle">미수금액</th>
+              <th className="p-2 w-[7%] text-center align-middle">청구횟수</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-separator">
