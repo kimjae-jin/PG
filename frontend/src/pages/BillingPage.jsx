@@ -61,14 +61,14 @@ const BillingPage = () => {
               <th className="p-2 w-[8%] text-center align-middle">프로젝트 넘버</th>
               <th className="p-2 w-[15%] align-middle">계약명</th>
               <th className="p-2 w-[15%] align-middle">발주처</th>
-              <th className="p-2 w-[8%] text-right align-middle">총계약금액</th>
-              <th className="p-2 w-[8%] text-right align-middle">총지분금액</th>
+              <th className="p-2 w-[8%] text-right align-middle"><div>총 계약</div><div>금액</div></th>
+              <th className="p-2 w-[8%] text-right align-middle"><div>총 지분</div><div>금액</div></th>
               <th className="p-2 w-[5%] text-center align-middle">지분율</th>
               <th className="p-2 w-[5%] text-center align-middle">기성율</th>
               <th className="p-2 w-[8%] text-right align-middle">청구금액</th>
               <th className="p-2 w-[8%] text-right align-middle">입금금액</th>
               <th className="p-2 w-[8%] text-right align-middle">미수금액</th>
-              <th className="p-2 w-[7%] text-center align-middle">청구횟수</th>
+              <th className="p-2 w-[7%] text-center align-middle"><div>청구</div><div>횟수</div></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-separator">
@@ -76,8 +76,12 @@ const BillingPage = () => {
               <tr key={item.id} onClick={() => handleRowClick(item.projectId)} className="hover:bg-tab-hover cursor-pointer divide-x divide-separator">
                 <td className="p-2 text-center align-middle">{getStatusChip(item.status)}</td>
                 <td className="p-2 text-center font-semibold align-middle">{item.project_no}</td>
-                <td className="p-2 align-middle tracking-tighter"><div className="truncate" title={item.project_name}>{item.project_name}</div></td>
-                <td className="p-2 align-middle tracking-tighter"><div className="truncate" title={item.client}>{item.client}</div></td>
+                <td className="p-2 align-middle tracking-tighter" title={item.project_name}>
+                  {item.project_name.length > 10 ? `${item.project_name.substring(0, 10)}...` : item.project_name}
+                </td>
+                <td className="p-2 align-middle tracking-tighter" title={item.client}>
+                  {item.client && item.client.length > 10 ? `${item.client.substring(0, 10)}...` : item.client}
+                </td>
                 <td className="p-2 text-right font-mono align-middle whitespace-nowrap">{formatCurrency(item.contract_amount)}</td>
                 <td className="p-2 text-right font-mono align-middle whitespace-nowrap">{formatCurrency(item.equity_amount)}</td>
                 <td className="p-2 text-center font-mono align-middle">{item.equity_rate || 0}%</td>

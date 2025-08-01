@@ -15,10 +15,7 @@ const ProjectList = () => {
     fetch('http://localhost:5001/api/projects')
       .then(res => res.ok ? res.json() : Promise.reject('Network response was not ok.'))
       .then(data => { setProjects(data); setLoading(false); })
-      .catch(err => {
-        setError('데이터 로딩 실패. 백엔드 서버를 확인하세요.');
-        setLoading(false);
-      });
+      .catch(err => { setError('데이터 로딩 실패. 백엔드 서버를 확인하세요.'); setLoading(false); });
   }, []);
 
   const filteredProjects = useMemo(() => {
@@ -57,22 +54,22 @@ const ProjectList = () => {
       </div>
       
       <div className="flex-grow overflow-auto bg-card-bg rounded-lg shadow">
-        <table className="min-w-full text-sm text-left">
+        <table className="w-full text-sm text-left">
           <thead className="sticky top-0 bg-table-header text-table-header-text uppercase z-10">
             <tr className="divide-x divide-separator">
-              <th className="p-2 w-[5%] text-center align-middle">상태</th>
-              <th className="p-2 w-[8%] text-center align-middle">프로젝트 넘버</th>
-              <th className="p-2 w-[15%] align-middle">계약명</th>
-              <th className="p-2 w-[15%] align-middle">발주처</th>
-              <th className="p-2 w-[9%] text-right align-middle">총계약금액</th>
-              <th className="p-2 w-[9%] text-right align-middle">총지분금액</th>
-              <th className="p-2 w-[5%] text-center align-middle">지분율</th>
-              <th className="p-2 w-[5%] text-center align-middle">기성율</th>
-              <th className="p-2 w-[7%] text-center align-middle">계약일</th>
-              <th className="p-2 w-[7%] text-center align-middle">착수일</th>
-              <th className="p-2 w-[7%] text-center align-middle">완료예정일</th>
-              <th className="p-2 w-[7%] text-center align-middle">완료일</th>
-              <th className="p-2 w-[6%] text-center align-middle">PM</th>
+              <th className="p-2 text-center align-middle" style={{width: '5%'}}>상태</th>
+              <th className="p-2 text-center align-middle" style={{width: '8%'}}>프로젝트 넘버</th>
+              <th className="p-2 align-middle" style={{width: '15%'}}>계약명</th>
+              <th className="p-2 align-middle" style={{width: '15%'}}>발주처</th>
+              <th className="p-2 text-right align-middle" style={{width: '9%'}}><div>총 계약</div><div>금액</div></th>
+              <th className="p-2 text-right align-middle" style={{width: '9%'}}><div>총 지분</div><div>금액</div></th>
+              <th className="p-2 text-center align-middle" style={{width: '5%'}}>지분율</th>
+              <th className="p-2 text-center align-middle" style={{width: '5%'}}>기성율</th>
+              <th className="p-2 text-center align-middle" style={{width: '7%'}}>계약일</th>
+              <th className="p-2 text-center align-middle" style={{width: '7%'}}>착수일</th>
+              <th className="p-2 text-center align-middle" style={{width: '7%'}}><div>완료</div><div>예정일</div></th>
+              <th className="p-2 text-center align-middle" style={{width: '7%'}}>완료일</th>
+              <th className="p-2 text-center align-middle" style={{width: '6%'}}>PM</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-separator">
@@ -80,8 +77,12 @@ const ProjectList = () => {
               <tr key={project.id} onClick={() => handleRowClick(project.id)} className="hover:bg-tab-hover cursor-pointer divide-x divide-separator">
                 <td className="p-2 text-center align-middle"><span className={`px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${project.status === '완료' ? 'bg-blue-200 text-blue-800' : 'bg-green-200 text-green-800'}`}>{project.status}</span></td>
                 <td className="p-2 text-center font-semibold align-middle">{project.project_no}</td>
-                <td className="p-2 align-middle tracking-tighter"><div className="truncate" title={project.project_name}>{project.project_name}</div></td>
-                <td className="p-2 align-middle tracking-tighter"><div className="truncate" title={project.client}>{project.client}</div></td>
+                <td className="p-2 align-middle tracking-tighter" title={project.project_name}>
+                  {project.project_name.length > 10 ? `${project.project_name.substring(0, 10)}...` : project.project_name}
+                </td>
+                <td className="p-2 align-middle tracking-tighter" title={project.client}>
+                  {project.client && project.client.length > 10 ? `${project.client.substring(0, 10)}...` : project.client}
+                </td>
                 <td className="p-2 text-right font-mono align-middle whitespace-nowrap">{formatCurrency(project.contract_amount)}</td>
                 <td className="p-2 text-right font-mono align-middle whitespace-nowrap">{formatCurrency(project.equity_amount)}</td>
                 <td className="p-2 text-center font-mono align-middle">{project.equity_rate || 0}%</td>
