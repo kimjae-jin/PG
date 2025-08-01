@@ -49,50 +49,62 @@ const BillingPage = () => {
 
   return (
     <div className="flex flex-col h-full">
+      {/* --- 페이지 헤더 (Page Header) 시작 --- */}
       <div className="flex-shrink-0 flex justify-between items-center mb-4">
-        {/* ... 필터 및 검색창 (이전과 동일) ... */}
+        {/* [최종 수정] 누락되었던 조회 필드 영역을 완벽하게 복원합니다. */}
+        <div className="flex items-center space-x-2">
+          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="bg-input-bg border border-separator rounded-md px-2 py-1.5 text-sm focus:ring-accent focus:border-accent">
+            <option value="전체">상태 (전체)</option>
+            <option value="청구">청구</option>
+            <option value="입금">입금</option>
+            <option value="미수">미수</option>
+            <option value="선입금">선입금</option>
+          </select>
+          <input type="text" placeholder="프로젝트/용역명/발주처 검색..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-64 bg-input-bg border border-separator rounded-md px-2 py-1.5 text-sm focus:ring-accent focus:border-accent" />
+        </div>
+        <button className="bg-accent text-white font-bold py-2 px-4 rounded hover:bg-accent-hover transition-opacity">+ 신규 등록</button>
       </div>
       
       <div className="flex-grow overflow-hidden bg-card-bg rounded-lg shadow flex flex-col">
-        {/* 페이지 헤더: 필드 헤더 (고정) */}
+        {/* 필드 헤더 (Table Head) */}
         <div className="overflow-x-auto flex-shrink-0">
-          <table className="w-full text-sm text-left">
+          <table className="w-full text-sm text-left table-fixed">
             <thead className="bg-table-header text-table-header-text uppercase">
               <tr className="divide-x divide-separator">
-                <th className="p-2 w-[5%] text-center align-middle">상태</th>
-                <th className="p-2 w-[8%] text-center align-middle">프로젝트 넘버</th>
-                <th className="p-2 w-[15%] align-middle">계약명</th>
-                <th className="p-2 w-[15%] align-middle">발주처</th>
-                <th className="p-2 w-[8%] text-right align-middle"><div>총 계약</div><div>금액</div></th>
-                <th className="p-2 w-[8%] text-right align-middle"><div>총 지분</div><div>금액</div></th>
-                <th className="p-2 w-[5%] text-center align-middle">지분율</th>
-                <th className="p-2 w-[5%] text-center align-middle">기성율</th>
-                <th className="p-2 w-[8%] text-right align-middle">청구금액</th>
-                <th className="p-2 w-[8%] text-right align-middle">입금금액</th>
-                <th className="p-2 w-[8%] text-right align-middle">미수금액</th>
-                <th className="p-2 w-[7%] text-center align-middle"><div>청구</div><div>횟수</div></th>
+                <th style={{width: '80px'}} className="p-2 text-center align-middle">상태</th>
+                <th style={{width: '120px'}} className="p-2 text-center align-middle">프로젝트 넘버</th>
+                <th style={{width: '280px'}} className="p-2 align-middle">계약명</th>
+                <th style={{width: '280px'}} className="p-2 align-middle">발주처</th>
+                <th style={{width: '130px'}} className="p-2 text-right align-middle"><div>총 계약</div><div>금액</div></th>
+                <th style={{width: '130px'}} className="p-2 text-right align-middle"><div>총 지분</div><div>금액</div></th>
+                <th style={{width: '80px'}} className="p-2 text-center align-middle">지분율</th>
+                <th style={{width: '80px'}} className="p-2 text-center align-middle">기성율</th>
+                <th style={{width: '130px'}} className="p-2 text-right align-middle">청구금액</th>
+                <th style={{width: '130px'}} className="p-2 text-right align-middle">입금금액</th>
+                <th style={{width: '130px'}} className="p-2 text-right align-middle">미수금액</th>
+                <th style={{width: '100px'}} className="p-2 text-center align-middle"><div>청구</div><div>횟수</div></th>
               </tr>
             </thead>
           </table>
         </div>
-        {/* 바디: 정보 (스크롤) */}
+        {/* --- 바디 (Body) 시작 --- */}
         <div className="overflow-y-auto flex-grow">
-          <table className="w-full text-sm text-left">
+          <table className="w-full text-sm text-left table-fixed">
             <tbody className="divide-y divide-separator">
               {filteredBillings.map(item => (
                 <tr key={item.id} onClick={() => handleRowClick(item.projectId)} className="hover:bg-tab-hover cursor-pointer divide-x divide-separator">
-                  <td className="p-2 w-[5%] text-center align-middle">{getStatusChip(item.status)}</td>
-                  <td className="p-2 w-[8%] text-center font-semibold align-middle">{item.project_no}</td>
-                  <td className="p-2 w-[15%] align-middle tracking-tighter" title={item.project_name}>{item.project_name.length > 10 ? `${item.project_name.substring(0, 10)}...` : item.project_name}</td>
-                  <td className="p-2 w-[15%] align-middle tracking-tighter" title={item.client}>{item.client && item.client.length > 10 ? `${item.client.substring(0, 10)}...` : item.client}</td>
-                  <td className="p-2 w-[8%] text-right font-mono align-middle whitespace-nowrap">{formatCurrency(item.contract_amount)}</td>
-                  <td className="p-2 w-[8%] text-right font-mono align-middle whitespace-nowrap">{formatCurrency(item.equity_amount)}</td>
-                  <td className="p-2 w-[5%] text-center font-mono align-middle">{item.equity_rate || 0}%</td>
-                  <td className="p-2 w-[5%] text-center font-mono align-middle">{item.progress_rate || 0}%</td>
-                  <td className="p-2 w-[8%] text-right font-mono align-middle whitespace-nowrap">{formatCurrency(item.request_amount)}</td>
-                  <td className="p-2 w-[8%] text-right font-mono align-middle text-green-500 whitespace-nowrap">{formatCurrency(item.deposit_amount)}</td>
-                  <td className={`p-2 w-[8%] text-right font-mono align-middle whitespace-nowrap ${item.outstanding > 0 ? 'text-red-500' : ''}`}>{formatCurrency(item.outstanding)}</td>
-                  <td className="p-2 w-[7%] text-center align-middle">{item.request_count}</td>
+                  <td style={{width: '80px'}} className="p-2 text-center align-middle">{getStatusChip(item.status)}</td>
+                  <td style={{width: '120px'}} className="p-2 text-center font-semibold align-middle">{item.project_no}</td>
+                  <td style={{width: '280px'}} className="p-2 align-middle tracking-tighter" title={item.project_name}>{item.project_name.length > 10 ? `${item.project_name.substring(0, 10)}...` : item.project_name}</td>
+                  <td style={{width: '280px'}} className="p-2 align-middle tracking-tighter" title={item.client}>{item.client && item.client.length > 10 ? `${item.client.substring(0, 10)}...` : item.client}</td>
+                  <td style={{width: '130px'}} className="p-2 text-right font-mono align-middle whitespace-nowrap">{formatCurrency(item.contract_amount)}</td>
+                  <td style={{width: '130px'}} className="p-2 text-right font-mono align-middle whitespace-nowrap">{formatCurrency(item.equity_amount)}</td>
+                  <td style={{width: '80px'}} className="p-2 text-center font-mono align-middle">{item.equity_rate || 0}%</td>
+                  <td style={{width: '80px'}} className="p-2 text-center font-mono align-middle">{item.progress_rate || 0}%</td>
+                  <td style={{width: '130px'}} className="p-2 text-right font-mono align-middle whitespace-nowrap">{formatCurrency(item.request_amount)}</td>
+                  <td style={{width: '130px'}} className="p-2 text-right font-mono align-middle text-green-500 whitespace-nowrap">{formatCurrency(item.deposit_amount)}</td>
+                  <td className={`p-2 w-[130px] text-right font-mono align-middle whitespace-nowrap ${item.outstanding > 0 ? 'text-red-500' : ''}`}>{formatCurrency(item.outstanding)}</td>
+                  <td className="p-2 w-[100px] text-center align-middle">{item.request_count}</td>
                 </tr>
               ))}
             </tbody>
