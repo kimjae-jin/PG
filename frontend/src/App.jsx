@@ -28,7 +28,8 @@ const App = () => {
             <Sidebar isCollapsed={isSidebarCollapsed} onToggle={toggleSidebar} />
             <div className="flex-1 flex flex-col overflow-hidden">
                 <Header projectNo={projectNo} />
-                <main className="flex-1 p-4 md:p-6 overflow-y-auto">
+                {/* [수정] <main> 태그에서 여백(p-4 md:p-6) 클래스를 제거 */}
+                <main className="flex-1 overflow-y-auto">
                     <Outlet context={{ setProjectNo }} />
                 </main>
             </div>

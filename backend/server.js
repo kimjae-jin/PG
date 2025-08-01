@@ -29,7 +29,7 @@ app.get('/api/billing', (req, res) => {
     const sql = `
         SELECT
             b.id, b.project_no, p.project_name, p.client,
-            p.contract_amount, p.equity_amount, -- [최종 수정] 프론트엔드와 필드명 통일 (total_amount -> contract_amount)
+            p.contract_amount, p.equity_amount, -- [수정] 누락되었던 p.equity_amount 필드 추가
             CASE WHEN p.contract_amount > 0 THEN CAST(COALESCE(p.equity_amount, 0) * 100 / p.contract_amount AS INTEGER) ELSE 0 END as equity_rate,
             p.progress_rate,
             b.request_amount, b.deposit_amount,

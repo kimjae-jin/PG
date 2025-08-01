@@ -19,7 +19,8 @@ function runAsync(db, sql, params = []) {
 }
 
 const createTablesQueries = {
-  projects: `CREATE TABLE projects (id INTEGER PRIMARY KEY AUTOINCREMENT, project_no TEXT NOT NULL UNIQUE, project_name TEXT NOT NULL, client TEXT, manager TEXT, status TEXT, contract_date DATE, start_date DATE, end_date DATE, contract_amount REAL, billed_amount REAL DEFAULT 0, progress_rate INTEGER DEFAULT 0)`,
+  // [수정] projects 테이블 정의에 equity_amount 컬럼 추가
+  projects: `CREATE TABLE projects (id INTEGER PRIMARY KEY AUTOINCREMENT, project_no TEXT NOT NULL UNIQUE, project_name TEXT NOT NULL, client TEXT, manager TEXT, status TEXT, contract_date DATE, start_date DATE, end_date DATE, contract_amount REAL, equity_amount REAL, billed_amount REAL DEFAULT 0, progress_rate INTEGER DEFAULT 0)`,
   billing_history: `CREATE TABLE billing_history (id INTEGER PRIMARY KEY AUTOINCREMENT, project_no TEXT NOT NULL, request_type TEXT, request_date DATE, request_amount REAL, deposit_date DATE, deposit_amount REAL, note TEXT, FOREIGN KEY (project_no) REFERENCES projects (project_no))`,
   special_notes_log: `CREATE TABLE special_notes_log (id INTEGER PRIMARY KEY AUTOINCREMENT, project_no TEXT NOT NULL, note TEXT NOT NULL, created_at DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (project_no) REFERENCES projects (project_no))`
 };
@@ -46,9 +47,11 @@ async function initializeDatabase(db) {
       console.log(`[정보] 원본 데이터에서 ${projectsData.length - uniqueProjects.length}개의 유효하지 않거나 중복된 항목을 제거했습니다.`);
     }
 
-    const projectStmt = db.prepare("INSERT INTO projects (project_no, project_name, client, manager, status, contract_date, start_date, end_date, contract_amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    // [수정] INSERT 문에 equity_amount 필드 추가
+    const projectStmt = db.prepare("INSERT INTO projects (project_no, project_name, client, manager, status, contract_date, start_date, end_date, contract_amount, equity_amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     for (const p of uniqueProjects) {
-        await runAsync(projectStmt, [p.project_number, p.project_name, p.client_name, p.remarks, p.status || '진행중', p.contract_date, p.start_date, p.end_date, p.total_amount]);
+        // [수정] 삽입할 데이터에 p.equity_amount 추가
+        await runAsync(projectStmt, [p.project_number, p.project_name, p.client_name, p.remarks, p.status || '진행중', p.contract_date, p.start_date, p.end_date, p.total_amount, p.equity_amount]);
     }
     await runAsync(projectStmt, 'finalize');
     console.log(`성공적으로 ${uniqueProjects.length}개의 실제 프로젝트 데이터를 삽입했습니다.`);
@@ -75,7 +78,26 @@ async function initializeDatabase(db) {
 }
 
 async function updateProjectFinances(db) {
-    const sql = `UPDATE projects SET billed_amount = (SELECT COALESCE(SUM(deposit_amount), 0) FROM billing_history WHERE billing_history.project_no = projects.project_no), progress_rate = (CASE WHEN projects.contract_amount > 0 THEN CAST((SELECT COALESCE(SUM(deposit_amount), 0) FROM billing_history WHERE billing_history.project_no = projects.project_no) * 100 / projects.contract_amount AS INTEGER) ELSE 0 END)`;
+    // [수정] equity_amount가 0 또는 NULL일 때 오류가 나지 않도록 COALESCE 함수로 감싸고,
+    // contract_amount가 0일 때 나누기 오류를 방지하는 CASE WHEN 구문 추가
+    const sql = `
+      UPDATE projects 
+      SET 
+        billed_amount = (
+          SELECT COALESCE(SUM(deposit_amount), 0) 
+          FROM billing_history 
+          WHERE billing_history.project_no = projects.project_no
+        ),
+        progress_rate = (
+          CASE 
+            WHEN COALESCE(projects.equity_amount, 0) > 0 THEN 
+              CAST(
+                (SELECT COALESCE(SUM(deposit_amount), 0) FROM billing_history WHERE billing_history.project_no = projects.project_no) * 100 / projects.equity_amount 
+                AS INTEGER
+              )
+            ELSE 0 
+          END
+        )`;
     const result = await runAsync(db, sql);
     console.log(`총 입금액 및 기성율 계산/업데이트를 완료했습니다. (${result.changes}건)`);
 }
