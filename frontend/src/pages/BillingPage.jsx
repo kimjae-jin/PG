@@ -53,47 +53,51 @@ const BillingPage = () => {
         {/* ... 필터 및 검색창 (이전과 동일) ... */}
       </div>
       
-      <div className="flex-grow overflow-auto bg-card-bg rounded-lg shadow table-container">
-        <table className="w-full text-sm text-left">
-          <thead className="sticky top-0 bg-table-header text-table-header-text uppercase z-10">
-            <tr className="divide-x divide-separator">
-              <th className="p-2 w-[5%] text-center align-middle">상태</th>
-              <th className="p-2 w-[8%] text-center align-middle">프로젝트 넘버</th>
-              <th className="p-2 w-[15%] align-middle">계약명</th>
-              <th className="p-2 w-[15%] align-middle">발주처</th>
-              <th className="p-2 w-[8%] text-right align-middle"><div>총 계약</div><div>금액</div></th>
-              <th className="p-2 w-[8%] text-right align-middle"><div>총 지분</div><div>금액</div></th>
-              <th className="p-2 w-[5%] text-center align-middle">지분율</th>
-              <th className="p-2 w-[5%] text-center align-middle">기성율</th>
-              <th className="p-2 w-[8%] text-right align-middle">청구금액</th>
-              <th className="p-2 w-[8%] text-right align-middle">입금금액</th>
-              <th className="p-2 w-[8%] text-right align-middle">미수금액</th>
-              <th className="p-2 w-[7%] text-center align-middle"><div>청구</div><div>횟수</div></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-separator">
-            {filteredBillings.map(item => (
-              <tr key={item.id} onClick={() => handleRowClick(item.projectId)} className="hover:bg-tab-hover cursor-pointer divide-x divide-separator">
-                <td className="p-2 text-center align-middle">{getStatusChip(item.status)}</td>
-                <td className="p-2 text-center font-semibold align-middle">{item.project_no}</td>
-                <td className="p-2 align-middle tracking-tighter" title={item.project_name}>
-                  {item.project_name.length > 10 ? `${item.project_name.substring(0, 10)}...` : item.project_name}
-                </td>
-                <td className="p-2 align-middle tracking-tighter" title={item.client}>
-                  {item.client && item.client.length > 10 ? `${item.client.substring(0, 10)}...` : item.client}
-                </td>
-                <td className="p-2 text-right font-mono align-middle whitespace-nowrap">{formatCurrency(item.contract_amount)}</td>
-                <td className="p-2 text-right font-mono align-middle whitespace-nowrap">{formatCurrency(item.equity_amount)}</td>
-                <td className="p-2 text-center font-mono align-middle">{item.equity_rate || 0}%</td>
-                <td className="p-2 text-center font-mono align-middle">{item.progress_rate || 0}%</td>
-                <td className="p-2 text-right font-mono align-middle whitespace-nowrap">{formatCurrency(item.request_amount)}</td>
-                <td className="p-2 text-right font-mono align-middle text-green-500 whitespace-nowrap">{formatCurrency(item.deposit_amount)}</td>
-                <td className={`p-2 text-right font-mono align-middle whitespace-nowrap ${item.outstanding > 0 ? 'text-red-500' : ''}`}>{formatCurrency(item.outstanding)}</td>
-                <td className="p-2 text-center align-middle">{item.request_count}</td>
+      <div className="flex-grow overflow-hidden bg-card-bg rounded-lg shadow flex flex-col">
+        {/* 테이블 헤더 영역 (고정) */}
+        <div className="overflow-x-auto flex-shrink-0">
+          <table className="w-full text-sm text-left">
+            <thead className="bg-table-header text-table-header-text uppercase">
+              <tr className="divide-x divide-separator">
+                <th className="p-2 w-[5%] text-center align-middle">상태</th>
+                <th className="p-2 w-[8%] text-center align-middle">프로젝트 넘버</th>
+                <th className="p-2 w-[15%] align-middle">계약명</th>
+                <th className="p-2 w-[15%] align-middle">발주처</th>
+                <th className="p-2 w-[8%] text-right align-middle"><div>총 계약</div><div>금액</div></th>
+                <th className="p-2 w-[8%] text-right align-middle"><div>총 지분</div><div>금액</div></th>
+                <th className="p-2 w-[5%] text-center align-middle">지분율</th>
+                <th className="p-2 w-[5%] text-center align-middle">기성율</th>
+                <th className="p-2 w-[8%] text-right align-middle">청구금액</th>
+                <th className="p-2 w-[8%] text-right align-middle">입금금액</th>
+                <th className="p-2 w-[8%] text-right align-middle">미수금액</th>
+                <th className="p-2 w-[7%] text-center align-middle"><div>청구</div><div>횟수</div></th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+          </table>
+        </div>
+        {/* 테이블 바디 영역 (스크롤) */}
+        <div className="overflow-auto flex-grow">
+          <table className="w-full text-sm text-left">
+            <tbody className="divide-y divide-separator">
+              {filteredBillings.map(item => (
+                <tr key={item.id} onClick={() => handleRowClick(item.projectId)} className="hover:bg-tab-hover cursor-pointer divide-x divide-separator">
+                  <td className="p-2 w-[5%] text-center align-middle">{getStatusChip(item.status)}</td>
+                  <td className="p-2 w-[8%] text-center font-semibold align-middle">{item.project_no}</td>
+                  <td className="p-2 w-[15%] align-middle tracking-tighter"><div className="truncate" title={item.project_name}>{item.project_name}</div></td>
+                  <td className="p-2 w-[15%] align-middle tracking-tighter"><div className="truncate" title={item.client}>{item.client}</div></td>
+                  <td className="p-2 w-[8%] text-right font-mono align-middle whitespace-nowrap">{formatCurrency(item.contract_amount)}</td>
+                  <td className="p-2 w-[8%] text-right font-mono align-middle whitespace-nowrap">{formatCurrency(item.equity_amount)}</td>
+                  <td className="p-2 w-[5%] text-center font-mono align-middle">{item.equity_rate || 0}%</td>
+                  <td className="p-2 w-[5%] text-center font-mono align-middle">{item.progress_rate || 0}%</td>
+                  <td className="p-2 w-[8%] text-right font-mono align-middle whitespace-nowrap">{formatCurrency(item.request_amount)}</td>
+                  <td className="p-2 w-[8%] text-right font-mono align-middle text-green-500 whitespace-nowrap">{formatCurrency(item.deposit_amount)}</td>
+                  <td className={`p-2 w-[8%] text-right font-mono align-middle whitespace-nowrap ${item.outstanding > 0 ? 'text-red-500' : ''}`}>{formatCurrency(item.outstanding)}</td>
+                  <td className="p-2 w-[7%] text-center align-middle">{item.request_count}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
