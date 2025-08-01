@@ -15,7 +15,10 @@ const ProjectList = () => {
     fetch('http://localhost:5001/api/projects')
       .then(res => res.ok ? res.json() : Promise.reject('Network response was not ok.'))
       .then(data => { setProjects(data); setLoading(false); })
-      .catch(err => { setError('데이터 로딩 실패. 백엔드 서버를 확인하세요.'); setLoading(false); });
+      .catch(err => {
+        setError('데이터 로딩 실패. 백엔드 서버를 확인하세요.');
+        setLoading(false);
+      });
   }, []);
 
   const filteredProjects = useMemo(() => {
@@ -29,7 +32,6 @@ const ProjectList = () => {
   }, [projects, statusFilter, searchTerm]);
 
   const formatCurrency = (amount) => amount != null ? `${amount.toLocaleString('ko-KR')}\u00A0원` : '-';
-  // [수정] 날짜 포맷을 'YY.MM.DD' 형식으로 변경
   const formatDate = (dateString) => {
     if (!dateString) return '-';
     const date = new Date(dateString);
@@ -42,6 +44,7 @@ const ProjectList = () => {
 
   return (
     <div className="flex flex-col h-full">
+      {/* 1. 조회 및 등록 영역 (고정) */}
       <div className="flex-shrink-0 flex justify-between items-center mb-4">
         <div className="flex items-center space-x-2">
           <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="bg-input-bg border border-separator rounded-md px-2 py-1.5 text-sm focus:ring-accent focus:border-accent">
@@ -54,23 +57,25 @@ const ProjectList = () => {
         <button className="bg-accent text-white font-bold py-2 px-4 rounded hover:bg-accent-hover transition-opacity">+ 신규 등록</button>
       </div>
       
-      <div className="flex-grow overflow-y-auto bg-card-bg rounded-lg shadow table-container">
+      {/* 2. 스크롤 영역 */}
+      <div className="flex-grow overflow-auto bg-card-bg rounded-lg shadow table-container">
         <table className="w-full text-sm text-left">
+          {/* 3. 테이블 헤더 (스크롤 시 상단에 고정) */}
           <thead className="sticky top-0 bg-table-header text-table-header-text uppercase z-10">
             <tr>
-              <th className="p-2 w-[5%] text-center">상태</th>
-              <th className="p-2 w-[8%] text-center">프로젝트 넘버</th>
+              <th className="p-2 text-center w-[5%]">상태</th>
+              <th className="p-2 text-center w-[8%]">프로젝트 넘버</th>
               <th className="p-2 w-[15%]">계약명</th>
               <th className="p-2 w-[15%]">발주처</th>
-              <th className="p-2 w-[9%] text-right">총계약금액</th>
-              <th className="p-2 w-[9%] text-right">총지분금액</th>
-              <th className="p-2 w-[5%] text-center">지분율</th>
-              <th className="p-2 w-[5%] text-center">기성율</th>
-              <th className="p-2 w-[7%] text-center">계약일</th>
-              <th className="p-2 w-[7%] text-center">착수일</th>
-              <th className="p-2 w-[7%] text-center">완료예정일</th>
-              <th className="p-2 w-[7%] text-center">완료일</th>
-              <th className="p-2 w-[6%] text-center">PM</th>
+              <th className="p-2 text-right w-[9%]"><div>총계약</div><div>금액</div></th>
+              <th className="p-2 text-right w-[9%]"><div>총지분</div><div>금액</div></th>
+              <th className="p-2 text-center w-[5%]">지분율</th>
+              <th className="p-2 text-center w-[5%]">기성율</th>
+              <th className="p-2 text-center w-[7%]">계약일</th>
+              <th className="p-2 text-center w-[7%]">착수일</th>
+              <th className="p-2 text-center w-[7%]"><div>완료</div><div>예정일</div></th>
+              <th className="p-2 text-center w-[7%]">완료일</th>
+              <th className="p-2 text-center w-[6%]">PM</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-separator">
