@@ -30,8 +30,9 @@ const ProjectList = () => {
         return (p.project_no.toLowerCase().includes(term) || p.project_name.toLowerCase().includes(term) || (p.client && p.client.toLowerCase().includes(term)));
       });
   }, [projects, statusFilter, searchTerm]);
-
-  const formatCurrency = (amount) => amount != null ? amount.toLocaleString('ko-KR') + ' 원' : '-';
+  
+  // [최종 수정] 금액 포맷팅 함수: 숫자와 '원'이 줄바꿈되지 않도록   사용
+  const formatCurrency = (amount) => amount != null ? `${amount.toLocaleString('ko-KR')}\u00A0원` : '-';
   const formatDate = (dateString) => dateString ? new Date(dateString).toLocaleDateString('ko-KR') : '-';
   const handleRowClick = (id) => navigate(`/projects/${id}`);
 
@@ -52,50 +53,57 @@ const ProjectList = () => {
         <button className="bg-accent text-white font-bold py-2 px-4 rounded hover:bg-accent-hover transition-opacity">+ 신규 등록</button>
       </div>
       
-      {/* [최종 수정] overflow-auto 하나로 수직/수평 스크롤을 모두 제어합니다. */}
-      <div className="flex-grow overflow-auto bg-card-bg rounded-lg shadow">
-        <table className="min-w-full text-sm text-left">
-          <thead className="sticky top-0 bg-table-header text-table-header-text uppercase z-10">
-            <tr>
-              <th className="p-3">상태</th>
-              <th className="p-3">프로젝트 넘버</th>
-              <th className="p-3">계약명</th>
-              <th className="p-3">발주처</th>
-              <th className="p-3 text-right"><div>총 계약</div><div>금액</div></th>
-              <th className="p-3 text-right"><div>총 지분</div><div>금액</div></th>
-              <th className="p-3 text-right">지분율</th>
-              <th className="p-3 text-right">기성율</th>
-              <th className="p-3">계약일</th>
-              <th className="p-3">착수일</th>
-              <th className="p-3"><div>완료</div><div>예정일</div></th>
-              <th className="p-3">완료일</th>
-              <th className="p-3">PM</th>
-              <th className="p-3"><div>추가</div><div>계약</div></th>
-              <th className="p-3">비고</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-separator">
-            {filteredProjects.map(project => (
-              <tr key={project.id} onClick={() => handleRowClick(project.id)} className="hover:bg-tab-hover cursor-pointer">
-                <td className="p-3 align-middle"><span className={`px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${project.status === '완료' ? 'bg-blue-200 text-blue-800' : 'bg-green-200 text-green-800'}`}>{project.status}</span></td>
-                <td className="p-3 font-semibold align-middle">{project.project_no}</td>
-                <td className="p-3 align-middle"><div className="w-24 truncate" title={project.project_name}>{project.project_name}</div></td>
-                <td className="p-3 align-middle"><div className="w-24 truncate" title={project.client}>{project.client}</div></td>
-                <td className="p-3 text-right font-mono align-middle">{formatCurrency(project.contract_amount)}</td>
-                <td className="p-3 text-right font-mono align-middle">{formatCurrency(project.equity_amount)}</td>
-                <td className="p-3 text-right font-mono align-middle">{project.equity_rate || 0}%</td>
-                <td className="p-3 text-right font-mono align-middle">{project.progress_rate || 0}%</td>
-                <td className="p-3 align-middle">{formatDate(project.contract_date)}</td>
-                <td className="p-3 align-middle">{formatDate(project.start_date)}</td>
-                <td className="p-3 align-middle">{formatDate(project.end_date)}</td>
-                <td className="p-3 align-middle">{project.status === '완료' ? formatDate(project.end_date) : '-'}</td>
-                <td className="p-3 align-middle">{project.manager}</td>
-                <td className="p-3 align-middle">{project.is_additional_contract ? 'Y' : 'N'}</td>
-                <td className="p-3 align-middle"></td>
+      <div className="flex-grow overflow-hidden bg-card-bg rounded-lg shadow flex flex-col">
+        {/* 테이블 헤더 영역 (고정) */}
+        <div className="overflow-x-auto flex-shrink-0">
+          <table className="min-w-full text-sm text-left">
+            <thead className="bg-table-header text-table-header-text uppercase">
+              <tr>
+                <th className="p-3 font-semibold sticky left-0 bg-table-header w-20">상태</th>
+                <th className="p-3 font-semibold w-28">프로젝트 넘버</th>
+                <th className="p-3 font-semibold min-w-[200px]">계약명</th>
+                <th className="p-3 font-semibold min-w-[200px]">발주처</th>
+                <th className="p-3 font-semibold w-32 text-right"><div>총 계약</div><div>금액</div></th>
+                <th className="p-3 font-semibold w-32 text-right"><div>총 지분</div><div>금액</div></th>
+                <th className="p-3 font-semibold w-20 text-right">지분율</th>
+                <th className="p-3 font-semibold w-20 text-right">기성율</th>
+                <th className="p-3 font-semibold w-28">계약일</th>
+                <th className="p-3 font-semibold w-28">착수일</th>
+                <th className="p-3 font-semibold w-28"><div>완료</div><div>예정일</div></th>
+                <th className="p-3 font-semibold w-28">완료일</th>
+                <th className="p-3 font-semibold w-24">PM</th>
+                <th className="p-3 font-semibold w-24"><div>추가</div><div>계약</div></th>
+                <th className="p-3 font-semibold w-24">비고</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+          </table>
+        </div>
+        {/* 테이블 바디 영역 (스크롤) */}
+        <div className="overflow-auto flex-grow">
+          <table className="min-w-full text-sm text-left">
+            <tbody className="divide-y divide-separator">
+              {filteredProjects.map(project => (
+                <tr key={project.id} onClick={() => handleRowClick(project.id)} className="hover:bg-tab-hover cursor-pointer">
+                  <td className="p-3 align-middle sticky left-0 bg-card-bg hover:bg-tab-hover w-20"><span className={`px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${project.status === '완료' ? 'bg-blue-200 text-blue-800' : 'bg-green-200 text-green-800'}`}>{project.status}</span></td>
+                  <td className="p-3 font-semibold align-middle w-28">{project.project_no}</td>
+                  <td className="p-3 align-middle min-w-[200px]"><div className="w-24 truncate" title={project.project_name}>{project.project_name}</div></td>
+                  <td className="p-3 align-middle min-w-[200px]"><div className="w-24 truncate" title={project.client}>{project.client}</div></td>
+                  <td className="p-3 text-right font-mono align-middle w-32 whitespace-nowrap">{formatCurrency(project.contract_amount)}</td>
+                  <td className="p-3 text-right font-mono align-middle w-32 whitespace-nowrap">{formatCurrency(project.equity_amount)}</td>
+                  <td className="p-3 text-right font-mono align-middle w-20">{project.equity_rate || 0}%</td>
+                  <td className="p-3 text-right font-mono align-middle w-20">{project.progress_rate || 0}%</td>
+                  <td className="p-3 align-middle w-28">{formatDate(project.contract_date)}</td>
+                  <td className="p-3 align-middle w-28">{formatDate(project.start_date)}</td>
+                  <td className="p-3 align-middle w-28">{formatDate(project.end_date)}</td>
+                  <td className="p-3 align-middle w-28">{project.status === '완료' ? formatDate(project.end_date) : '-'}</td>
+                  <td className="p-3 align-middle w-24">{project.manager}</td>
+                  <td className="p-3 align-middle w-24">{project.is_additional_contract ? 'Y' : 'N'}</td>
+                  <td className="p-3 align-middle w-24"></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
