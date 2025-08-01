@@ -44,7 +44,6 @@ const ProjectList = () => {
 
   return (
     <div className="flex flex-col h-full">
-      {/* 1. 조회 및 등록 영역 (고정) */}
       <div className="flex-shrink-0 flex justify-between items-center mb-4">
         <div className="flex items-center space-x-2">
           <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="bg-input-bg border border-separator rounded-md px-2 py-1.5 text-sm focus:ring-accent focus:border-accent">
@@ -57,30 +56,31 @@ const ProjectList = () => {
         <button className="bg-accent text-white font-bold py-2 px-4 rounded hover:bg-accent-hover transition-opacity">+ 신규 등록</button>
       </div>
       
-      {/* 2. 스크롤 영역 */}
-      <div className="flex-grow overflow-auto bg-card-bg rounded-lg shadow table-container">
+      {/* [최종 수정] 24인치 모니터 최적화를 위해 컨테이너에 max-w-screen-2xl(1536px)보다 넓은 너비를 직접 지정하고, 
+                     전체 너비의 95%를 차지하도록 w-[95%] 클래스를 적용합니다. */}
+      <div className="flex-grow overflow-auto bg-card-bg rounded-lg shadow table-container w-[95%]">
         <table className="w-full text-sm text-left">
-          {/* 3. 테이블 헤더 (스크롤 시 상단에 고정) */}
           <thead className="sticky top-0 bg-table-header text-table-header-text uppercase z-10">
-            <tr>
-              <th className="p-2 text-center w-[5%]">상태</th>
-              <th className="p-2 text-center w-[8%]">프로젝트 넘버</th>
-              <th className="p-2 w-[15%]">계약명</th>
-              <th className="p-2 w-[15%]">발주처</th>
-              <th className="p-2 text-right w-[9%]"><div>총계약</div><div>금액</div></th>
-              <th className="p-2 text-right w-[9%]"><div>총지분</div><div>금액</div></th>
-              <th className="p-2 text-center w-[5%]">지분율</th>
-              <th className="p-2 text-center w-[5%]">기성율</th>
-              <th className="p-2 text-center w-[7%]">계약일</th>
-              <th className="p-2 text-center w-[7%]">착수일</th>
-              <th className="p-2 text-center w-[7%]"><div>완료</div><div>예정일</div></th>
-              <th className="p-2 text-center w-[7%]">완료일</th>
-              <th className="p-2 text-center w-[6%]">PM</th>
+            <tr className="divide-x divide-separator">
+              {/* [최종 수정] 모든 컬럼 너비를 px 단위로 정밀하게 재설계합니다. */}
+              <th style={{width: '80px'}} className="p-2 text-center h-12 flex items-center justify-center">상태</th>
+              <th style={{width: '120px'}} className="p-2 text-center h-12 flex items-center justify-center">프로젝트 넘버</th>
+              <th style={{width: '280px'}} className="p-2 h-12 flex items-center">계약명</th>
+              <th style={{width: '280px'}} className="p-2 h-12 flex items-center">발주처</th>
+              <th style={{width: '130px'}} className="p-2 text-right h-12 flex items-center justify-end"><div>총 계약</div><div>금액</div></th>
+              <th style={{width: '130px'}} className="p-2 text-right h-12 flex items-center justify-end"><div>총 지분</div><div>금액</div></th>
+              <th style={{width: '80px'}} className="p-2 text-center h-12 flex items-center justify-center">지분율</th>
+              <th style={{width: '80px'}} className="p-2 text-center h-12 flex items-center justify-center">기성율</th>
+              <th style={{width: '110px'}} className="p-2 text-center h-12 flex items-center justify-center">계약일</th>
+              <th style={{width: '110px'}} className="p-2 text-center h-12 flex items-center justify-center">착수일</th>
+              <th style={{width: '110px'}} className="p-2 text-center h-12 flex items-center justify-center"><div>완료</div><div>예정일</div></th>
+              <th style={{width: '110px'}} className="p-2 text-center h-12 flex items-center justify-center">완료일</th>
+              <th style={{width: '100px'}} className="p-2 text-center h-12 flex items-center justify-center">PM</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-separator">
             {filteredProjects.map(project => (
-              <tr key={project.id} onClick={() => handleRowClick(project.id)} className="hover:bg-tab-hover cursor-pointer">
+              <tr key={project.id} onClick={() => handleRowClick(project.id)} className="hover:bg-tab-hover cursor-pointer divide-x divide-separator">
                 <td className="p-2 text-center align-middle"><span className={`px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${project.status === '완료' ? 'bg-blue-200 text-blue-800' : 'bg-green-200 text-green-800'}`}>{project.status}</span></td>
                 <td className="p-2 text-center font-semibold align-middle">{project.project_no}</td>
                 <td className="p-2 align-middle tracking-tighter"><div className="truncate" title={project.project_name}>{project.project_name}</div></td>
