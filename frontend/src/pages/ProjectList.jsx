@@ -7,10 +7,8 @@ const ProjectList = () => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
   const [statusFilter, setStatusFilter] = useState('전체');
   const [searchTerm, setSearchTerm] = useState('');
-  
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -18,7 +16,6 @@ const ProjectList = () => {
       .then(res => res.ok ? res.json() : Promise.reject('Network response was not ok.'))
       .then(data => { setProjects(data); setLoading(false); })
       .catch(err => {
-        console.error("프로젝트 목록 로딩 실패:", err);
         setError('데이터 로딩 실패. 백엔드 서버를 확인하세요.');
         setLoading(false);
       });
@@ -30,11 +27,11 @@ const ProjectList = () => {
       .filter(p => {
         if (!searchTerm.trim()) return true;
         const term = searchTerm.toLowerCase();
-        return ( p.project_no.toLowerCase().includes(term) || p.project_name.toLowerCase().includes(term) || (p.client && p.client.toLowerCase().includes(term)) );
+        return (p.project_no.toLowerCase().includes(term) || p.project_name.toLowerCase().includes(term) || (p.client && p.client.toLowerCase().includes(term)));
       });
   }, [projects, statusFilter, searchTerm]);
 
-  const formatCurrency = (amount) => amount ? amount.toLocaleString('ko-KR') : '-';
+  const formatCurrency = (amount) => amount != null ? amount.toLocaleString('ko-KR') + ' 원' : '-';
   const formatDate = (dateString) => dateString ? new Date(dateString).toLocaleDateString('ko-KR') : '-';
   const handleRowClick = (id) => navigate(`/projects/${id}`);
 
@@ -54,59 +51,53 @@ const ProjectList = () => {
         </div>
         <button className="bg-accent text-white font-bold py-2 px-4 rounded hover:bg-accent-hover transition-opacity">+ 신규 등록</button>
       </div>
-
-      <div className="flex-grow overflow-hidden bg-card-bg rounded-lg shadow flex flex-col">
-        <div className="overflow-y-auto">
-          <table className="min-w-full text-sm text-left table-fixed">
-            <thead className="sticky top-0 bg-table-header text-table-header-text uppercase z-10">
-              <tr>
-                <th className="w-20 p-3">상태</th>
-                <th className="w-28 p-3">프로젝트 넘버</th>
-                <th className="p-3">계약명</th>
-                <th className="p-3">발주처</th>
-                <th className="w-32 p-3 text-right">총계약금액</th>
-                <th className="w-32 p-3 text-right">총지분금액</th>
-                <th className="w-20 p-3 text-right">지분율</th>
-                <th className="w-20 p-3 text-right">기성율</th>
-                <th className="w-28 p-3">계약일</th>
-                <th className="w-28 p-3">착수일</th>
-                <th className="w-28 p-3">완료예정일</th>
-                <th className="w-28 p-3">완료일</th>
-                <th className="w-24 p-3">PM</th>
-                <th className="w-24 p-3">추가계약</th>
-                <th className="w-24 p-3">비고</th>
+      
+      {/* [최종 수정] overflow-auto 하나로 수직/수평 스크롤을 모두 제어합니다. */}
+      <div className="flex-grow overflow-auto bg-card-bg rounded-lg shadow">
+        <table className="min-w-full text-sm text-left">
+          <thead className="sticky top-0 bg-table-header text-table-header-text uppercase z-10">
+            <tr>
+              <th className="p-3">상태</th>
+              <th className="p-3">프로젝트 넘버</th>
+              <th className="p-3">계약명</th>
+              <th className="p-3">발주처</th>
+              <th className="p-3 text-right"><div>총 계약</div><div>금액</div></th>
+              <th className="p-3 text-right"><div>총 지분</div><div>금액</div></th>
+              <th className="p-3 text-right">지분율</th>
+              <th className="p-3 text-right">기성율</th>
+              <th className="p-3">계약일</th>
+              <th className="p-3">착수일</th>
+              <th className="p-3"><div>완료</div><div>예정일</div></th>
+              <th className="p-3">완료일</th>
+              <th className="p-3">PM</th>
+              <th className="p-3"><div>추가</div><div>계약</div></th>
+              <th className="p-3">비고</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-separator">
+            {filteredProjects.map(project => (
+              <tr key={project.id} onClick={() => handleRowClick(project.id)} className="hover:bg-tab-hover cursor-pointer">
+                <td className="p-3 align-middle"><span className={`px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${project.status === '완료' ? 'bg-blue-200 text-blue-800' : 'bg-green-200 text-green-800'}`}>{project.status}</span></td>
+                <td className="p-3 font-semibold align-middle">{project.project_no}</td>
+                <td className="p-3 align-middle"><div className="w-24 truncate" title={project.project_name}>{project.project_name}</div></td>
+                <td className="p-3 align-middle"><div className="w-24 truncate" title={project.client}>{project.client}</div></td>
+                <td className="p-3 text-right font-mono align-middle">{formatCurrency(project.contract_amount)}</td>
+                <td className="p-3 text-right font-mono align-middle">{formatCurrency(project.equity_amount)}</td>
+                <td className="p-3 text-right font-mono align-middle">{project.equity_rate || 0}%</td>
+                <td className="p-3 text-right font-mono align-middle">{project.progress_rate || 0}%</td>
+                <td className="p-3 align-middle">{formatDate(project.contract_date)}</td>
+                <td className="p-3 align-middle">{formatDate(project.start_date)}</td>
+                <td className="p-3 align-middle">{formatDate(project.end_date)}</td>
+                <td className="p-3 align-middle">{project.status === '완료' ? formatDate(project.end_date) : '-'}</td>
+                <td className="p-3 align-middle">{project.manager}</td>
+                <td className="p-3 align-middle">{project.is_additional_contract ? 'Y' : 'N'}</td>
+                <td className="p-3 align-middle"></td>
               </tr>
-            </thead>
-            <tbody className="divide-y divide-separator">
-              {filteredProjects.length > 0 ? (
-                filteredProjects.map(project => (
-                  <tr key={project.id} onClick={() => handleRowClick(project.id)} className="hover:bg-tab-hover cursor-pointer">
-                    <td className="w-20 p-3 align-middle"><span className={`px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${project.status === '완료' ? 'bg-blue-200 text-blue-800' : 'bg-green-200 text-green-800'}`}>{project.status}</span></td>
-                    <td className="w-28 p-3 font-semibold align-middle">{project.project_no}</td>
-                    <td className="p-3 align-middle"><div className="truncate" title={project.project_name}>{project.project_name.substring(0, 10)}{project.project_name.length > 10 && '...'}</div></td>
-                    <td className="p-3 align-middle"><div className="truncate" title={project.client}>{project.client?.substring(0, 10)}{project.client?.length > 10 && '...'}</div></td>
-                    <td className="w-32 p-3 text-right font-mono align-middle">{formatCurrency(project.contract_amount)}</td>
-                    <td className="w-32 p-3 text-right font-mono align-middle">{formatCurrency(project.equity_amount)}</td>
-                    <td className="w-20 p-3 text-right font-mono align-middle">{project.equity_rate || 0}%</td>
-                    <td className="w-20 p-3 text-right font-mono align-middle">{project.progress_rate || 0}%</td>
-                    <td className="w-28 p-3 align-middle">{formatDate(project.contract_date)}</td>
-                    <td className="w-28 p-3 align-middle">{formatDate(project.start_date)}</td>
-                    <td className="w-28 p-3 align-middle">{formatDate(project.end_date)}</td>
-                    <td className="w-28 p-3 align-middle">{project.status === '완료' ? formatDate(project.end_date) : '-'}</td>
-                    <td className="w-24 p-3 align-middle">{project.manager}</td>
-                    <td className="w-24 p-3 align-middle">{project.is_additional_contract ? 'Y' : 'N'}</td>
-                    <td className="w-24 p-3 align-middle"></td>
-                  </tr>
-                ))
-              ) : (
-                <tr><td colSpan="15" className="text-center p-8 text-text-muted">조회된 프로젝트가 없습니다.</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
 };
-
 export default ProjectList;

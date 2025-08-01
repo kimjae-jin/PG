@@ -1,7 +1,7 @@
 // frontend/src/pages/ProjectDetail.jsx
 
 import React, { useState, useEffect } from 'react';
-import { useParams, useSearchParams, Link, useOutletContext } from 'react-router-dom';
+import { useParams, useSearchParams, useOutletContext } from 'react-router-dom';
 
 const InfoCard = ({ title, children, className = '' }) => (<div className={`bg-card-bg p-4 rounded-lg shadow-md ${className}`}><h3 className="text-xs text-text-muted font-semibold mb-2 uppercase">{title}</h3><div>{children}</div></div>);
 const TabButton = ({ label, name, activeTab, setActiveTab }) => (<button onClick={() => setActiveTab(name)} className={`py-3 px-4 text-sm font-semibold transition-colors duration-200 ${activeTab === name ? 'border-b-2 border-accent text-text-color' : 'text-text-muted hover:text-text-color hover:bg-tab-hover'}`}>{label}</button>);
@@ -49,12 +49,14 @@ const ProjectDetail = () => {
     if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
     if (!project) return <div className="p-8 text-center text-text-muted">프로젝트 데이터가 없습니다.</div>;
     
-    const balance = (project.contract_amount || 0) - (project.billed_amount || 0);
+    const equityRate = project.contract_amount > 0 ? Math.round((project.equity_amount || 0) * 100 / project.contract_amount) : 0;
+    const balance = (project.equity_amount || 0) - (project.billed_amount || 0);
     const statusColor = project.status === '완료' ? 'text-blue-500' : 'text-green-500';
     
     return (
         <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {/* [최종 수정] 함장님의 원본 설계대로 모든 정보 카드를 완벽하게 복원합니다. */}
                 <InfoCard title="계약 정보" className="md:col-span-2 lg:col-span-3">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                         <div><span className="font-semibold text-text-muted">프로젝트 넘버:</span> {project.project_no}</div>
@@ -63,11 +65,22 @@ const ProjectDetail = () => {
                         <div><span className="font-semibold text-text-muted">구분:</span> 공공</div>
                     </div>
                 </InfoCard>
+
                 <InfoCard title="총괄 계약명" className="md:col-span-2 lg:col-span-2"><p className="text-2xl font-bold text-text-color break-words">{project.project_name}</p></InfoCard>
                 <InfoCard title="계약상대자"><p className="text-xl font-bold text-text-color">{project.client}</p></InfoCard>
                 <InfoCard title="담당자/비고"><p className="text-xl font-semibold text-text-color">{project.manager}</p></InfoCard>
                 <InfoCard title="주요 사업일정"><div className="space-y-2 text-sm"><div><span className="font-semibold text-text-muted w-20 inline-block">계약일:</span> <span>{project.contract_date ? new Date(project.contract_date).toLocaleDateString('ko-KR') : '-'}</span></div><div><span className="font-semibold text-text-muted w-20 inline-block">착수일:</span> <span>{new Date(project.start_date).toLocaleDateString('ko-KR')}</span></div><div><span className="font-semibold text-text-muted w-20 inline-block">완료예정일:</span> <span>{new Date(project.end_date).toLocaleDateString('ko-KR')}</span></div><div><span className="font-semibold text-text-muted w-20 inline-block">현재상태:</span> <span className={`font-bold ${statusColor}`}>{project.status}</span></div></div></InfoCard>
-                <InfoCard title="금액 정보"><div className="space-y-1 text-sm"><div><span className="font-semibold text-text-muted w-24 inline-block">총 계약금액:</span> <span className="font-mono">{project.contract_amount?.toLocaleString()} 원</span></div><div><span className="font-semibold text-text-muted w-24 inline-block">총 입금액:</span> <span className="font-mono">{project.billed_amount?.toLocaleString() || 0} 원</span></div><div><span className="font-semibold text-text-muted w-24 inline-block">현재 잔액:</span> <span className={`font-mono ${balance > 0 ? 'text-red-500' : ''}`}>{balance.toLocaleString()} 원</span></div></div></InfoCard>
+                
+                <InfoCard title="금액 정보">
+                    <div className="space-y-1 text-sm">
+                        <div><span className="font-semibold text-text-muted w-24 inline-block">총 계약금액:</span> <span className="font-mono">{project.contract_amount?.toLocaleString()} 원</span></div>
+                        <div><span className="font-semibold text-text-muted w-24 inline-block">총 지분금액:</span> <span className="font-mono">{project.equity_amount?.toLocaleString()} 원 ({equityRate}%)</span></div>
+                        <div><span className="font-semibold text-text-muted w-24 inline-block">부가세 적용:</span> <span className="font-mono">Y</span></div>
+                        <hr className="my-2 border-separator"/>
+                        <div><span className="font-semibold text-text-muted w-24 inline-block">총 입금액:</span> <span className="font-mono text-green-500">{project.billed_amount?.toLocaleString() || 0} 원</span></div>
+                        <div><span className="font-semibold text-text-muted w-24 inline-block">현재 잔액:</span> <span className={`font-mono ${balance > 0 ? 'text-red-500' : ''}`}>{balance.toLocaleString()} 원</span></div>
+                    </div>
+                </InfoCard>
             </div>
             <div className="bg-card-bg rounded-lg shadow-md">
                 <div className="flex border-b border-separator overflow-x-auto">
@@ -82,5 +95,4 @@ const ProjectDetail = () => {
         </div>
     );
 };
-
 export default ProjectDetail;
