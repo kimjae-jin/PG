@@ -32,6 +32,22 @@ app.get('/api/projects', (req, res) => {
   });
 });
 
+// [핵심] 관계사 목록 API - '거래횟수' 동적 계산 추가
+app.get('/api/companies', (req, res) => {
+  const sql = `
+    SELECT 
+      c.*,
+      (SELECT COUNT(p.id) FROM projects p WHERE p.client = c.name) as transaction_count
+    FROM companies c 
+    ORDER BY c.name ASC
+  `;
+  db.all(sql, [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+
+
 app.get('/api/billing', (req, res) => {
     const sql = `
         SELECT
@@ -46,9 +62,7 @@ app.get('/api/billing', (req, res) => {
             p.contract_amount, p.equity_amount,
             p.progress_rate,
             b.request_amount, b.deposit_amount,
-            -- [핵심 수정 1] 미수금은 0 이하로 내려가지 않도록 수정
             MAX(0, COALESCE(b.request_amount, 0) - COALESCE(b.deposit_amount, 0)) as outstanding,
-            -- [핵심 수정 2] 총 횟수가 아닌, 청구 순서(회차)를 표시하도록 수정
             ROW_NUMBER() OVER (PARTITION BY p.project_no ORDER BY b.request_date ASC, b.id ASC) as request_count,
             b.note
         FROM billing_history b

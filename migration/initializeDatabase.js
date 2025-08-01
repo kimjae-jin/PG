@@ -1,7 +1,7 @@
 import { projectsData } from './project-data.js';
 import { billingData } from './billing-data.js';
 
-// [핵심 수정] 오류의 원인이었던 데이터 내부의 백틱(`)을 이스케이프 처리합니다. (\`)
+// --- 제공해주신 '기타' 데이터 (이스케이프 처리 완료) ---
 const legacyNotesText = `
 2023-74	PQ	영어교육도시 제2진입도로 건설공사 건설사업관리용역(1차)	제주특별자치도	 202,000,000 	 60,600,000 	30%			 60,600,000 	 - 	2024.3.28	배성환	1차 24/3/22준공
 2023-74	PQ	영어교육도시 제2진입도로 건설공사 건설사업관리용역(2차)	제주특별자치도	 1,460,880,000 	 438,264,000 	30%		69.96%	 15,030,000 	 306,593,310 	 131,670,690 	2026.4.16	배성환	"2차 부문 70%선금 2차 부문 기성금 청구 24/10/16 변경계약(기간연장 등) 12/10 3차 기성 청구(세/계 발행) 12/12 3차 기성 입금 25.3.14 25년도 ES 적용 변경계약 25.3.27 기성청구 25.3.27 입금완료 2차분 기성(3차) 신청예정(25년6월중) 6/25 5차기성금 청구(세,계발행)"
@@ -79,6 +79,26 @@ function runAsync(db, sql, params = []) {
 }
 
 const createTablesQueries = {
+  companies: `
+    CREATE TABLE companies (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      status TEXT DEFAULT '정상',            -- 상태 (정상, 폐업, 휴업)
+      name TEXT NOT NULL UNIQUE,          -- 거래처명
+      registration_number TEXT,         -- 사업자등록번호
+      corporate_number TEXT,            -- 법인등록번호
+      address TEXT,                     -- (거래처) 소재지
+      phone_number TEXT,                -- (거래처) 연락처
+      ceo_name TEXT,                    -- 대표자(명)
+      contract_manager_name TEXT,       -- 계약담당자(명)
+      contract_manager_phone TEXT,      -- 계약담당자(연락처)
+      contract_manager_email TEXT,      -- 계약담당자(전자우편)
+      work_manager_name TEXT,           -- 업무담당자(명)
+      work_manager_phone TEXT,          -- 업무담당자(연락처)
+      work_manager_email TEXT,          -- 업무담당자(전자우편)
+      special_notes TEXT,               -- 특이사항
+      remarks TEXT,                     -- 비고
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`,
   projects: `
     CREATE TABLE projects (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -167,9 +187,8 @@ function getLegacyNotesMap() {
         const columns = line.split('\t');
         if (columns.length >= 15) {
             const projectNo = columns[0].trim();
-            let note = columns[14].trim().replace(/"/g, ''); // 쌍따옴표 제거
+            let note = columns[14].trim().replace(/"/g, '');
             if (projectNo && note) {
-                // '외주' 프로젝트인 경우 용역명을 노트에 포함
                 if (columns[0].toLowerCase().includes('외주')) {
                     note = `${columns[2].trim()}: ${note}`;
                 }
@@ -185,15 +204,30 @@ function getLegacyNotesMap() {
     return notesMap;
 }
 
+function extractUniqueCompanies(projectList) {
+    const companyNames = new Set();
+    projectList.forEach(p => {
+        if (p.client_name) {
+            const normalizedName = p.client_name.replace(/\(주\)|주식회사|\(유\)|유한회사/g, '').trim();
+            if (normalizedName) {
+                companyNames.add(normalizedName);
+            }
+        }
+    });
+    return Array.from(companyNames);
+}
+
 
 async function initializeDatabase(db) {
   console.log("데이터베이스 초기화를 시작합니다...");
   await runAsync(db, "BEGIN TRANSACTION");
   try {
+    await runAsync(db, "DROP TABLE IF EXISTS companies");
     await runAsync(db, "DROP TABLE IF EXISTS projects");
     await runAsync(db, "DROP TABLE IF EXISTS billing_history");
     await runAsync(db, "DROP TABLE IF EXISTS special_notes_log");
     
+    await runAsync(db, createTablesQueries.companies);
     await runAsync(db, createTablesQueries.projects);
     await runAsync(db, createTablesQueries.billing_history);
     await runAsync(db, createTablesQueries.special_notes_log);
@@ -208,10 +242,20 @@ async function initializeDatabase(db) {
       console.log(`[정보] 원본 데이터에서 ${projectsData.length - uniqueProjects.length}개의 유효하지 않거나 중복된 항목을 제거했습니다.`);
     }
 
+    const uniqueCompanies = extractUniqueCompanies(uniqueProjects);
+    const companyStmt = db.prepare("INSERT INTO companies (name) VALUES (?)");
+    for (const companyName of uniqueCompanies) {
+        await runAsync(companyStmt, [companyName]);
+    }
+    await runAsync(companyStmt, 'finalize');
+    console.log(`성공적으로 ${uniqueCompanies.length}개의 고유 관계사 데이터를 생성했습니다.`);
+
+
     const projectStmt = db.prepare("INSERT INTO projects (project_no, project_name, client, manager, status, contract_date, start_date, end_date, contract_amount, equity_amount, remarks, special_notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     for (const p of uniqueProjects) {
         const specialNote = legacyNotes.get(p.project_number) || null;
-        await runAsync(projectStmt, [p.project_number, p.project_name, p.client_name, p.remarks, p.status || '진행중', p.contract_date, p.start_date, p.end_date, p.total_amount, p.equity_amount, p.remarks, specialNote]);
+        const normalizedClient = p.client_name ? p.client_name.replace(/\(주\)|주식회사|\(유\)|유한회사/g, '').trim() : '';
+        await runAsync(projectStmt, [p.project_number, p.project_name, normalizedClient, p.remarks, p.status || '진행중', p.contract_date, p.start_date, p.end_date, p.total_amount, p.equity_amount, p.remarks, specialNote]);
     }
     await runAsync(projectStmt, 'finalize');
     console.log(`성공적으로 ${uniqueProjects.length}개의 실제 프로젝트 데이터를 삽입했습니다.`);
@@ -224,7 +268,6 @@ async function initializeDatabase(db) {
     await runAsync(billingStmt, 'finalize');
     console.log(`성공적으로 ${validBillings.length}개의 실제 재무 데이터를 삽입했습니다.`);
     
-    // 자동 로그 생성 함수
     async function generateAutomaticLogs(db) {
         console.log("자동 로그 생성을 시작합니다...");
         const logStmt = db.prepare("INSERT INTO special_notes_log (project_no, note, created_at) VALUES (?, ?, ?)");
@@ -250,12 +293,11 @@ async function initializeDatabase(db) {
         for (const b of billings) {
             const requestDate = formatDate(b.request_date);
             const depositDate = formatDate(b.deposit_date);
-            if (requestDate) await runAsync(logStmt, [b.project_no, `[자동] ${requestDate} 청구`, b.request_date]);
-            if (depositDate) await runAsync(logStmt, [b.project_no, `[자동] ${depositDate} 입금`, b.deposit_date]);
+            if (requestDate) await runAsync(logStmt, [p.project_no, `[자동] ${requestDate} 청구`, b.request_date]);
+            if (depositDate) await runAsync(logStmt, [p.project_no, `[자동] ${depositDate} 입금`, b.deposit_date]);
         }
 
-        const externalNotes = getLegacyNotesMap();
-        for (const [project_no, note] of externalNotes.entries()) {
+        for (const [project_no, note] of legacyNotes.entries()) {
             if (note) {
               const notes = note.split('\n');
               for (const singleNote of notes) {
