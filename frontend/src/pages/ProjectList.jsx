@@ -40,7 +40,6 @@ const ProjectList = () => {
   if (error) return <div className="p-6 text-center text-text-muted">{error}</div>;
 
   return (
-    // [수정] 페이지 최상위 div에 여백(p-4 md:p-6)을 직접 적용
     <div className="flex flex-col h-full p-4 md:p-6">
       <div className="flex flex-col h-full bg-card-bg rounded-lg shadow">
         <div className="flex-shrink-0 flex justify-between items-center p-4 border-b border-separator">
@@ -64,8 +63,9 @@ const ProjectList = () => {
                   <th className="p-2 text-center align-middle" style={{ width: '7rem' }}>프로젝트 넘버</th>
                   <th className="p-2 align-middle">계약명</th>
                   <th className="p-2 align-middle">발주처</th>
-                  <th className="p-2 text-right align-middle" style={{ width: '8rem' }}>총 계약 금액</th>
-                  <th className="p-2 text-right align-middle" style={{ width: '8rem' }}>총 지분 금액</th>
+                  {/* [수정] 헤더 텍스트를 div로 감싸 두 줄로 표시 */}
+                  <th className="p-2 text-right align-middle" style={{ width: '8rem' }}><div>총 계약</div><div>금액</div></th>
+                  <th className="p-2 text-right align-middle" style={{ width: '8rem' }}><div>총 지분</div><div>금액</div></th>
                   <th className="p-2 text-center align-middle" style={{ width: '5rem' }}>기성율</th>
                   <th className="p-2 text-center align-middle" style={{ width: '6rem' }}>착수일</th>
                   <th className="p-2 text-center align-middle" style={{ width: '6rem' }}>완료예정일</th>
