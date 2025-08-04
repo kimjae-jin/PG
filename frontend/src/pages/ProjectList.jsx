@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import ColumnSelector from '../components/ColumnSelector';
 
 // --- 단일 진실 공급원: 컬럼 정의 ---
@@ -33,7 +33,6 @@ const getInitialVisibleColumns = () => {
 
 const LOCAL_STORAGE_KEY = 'projectList_visibleColumns_v2';
 
-// [신규] 컬럼 너비 동기화를 위한 ColGroup 컴포넌트
 const TableColGroup = ({ visibleColumns }) => (
   <colgroup>
     <col style={{ width: '3rem' }} />
@@ -135,12 +134,14 @@ const ProjectList = () => {
           </div>
           <div className="flex items-center space-x-2">
             <ColumnSelector allColumns={ALL_COLUMNS} visibleColumns={visibleColumns} setVisibleColumns={setVisibleColumns} fixedColumns={FIXED_COLUMNS}/>
-            <button className="bg-accent text-white font-bold py-2 px-4 rounded hover:bg-accent-hover">+ 신규 등록</button>
+            {/* [수정] Link의 to 경로도 일관성을 위해 /projects/new 로 변경합니다. */}
+            <Link to="/projects/new">
+              <button className="bg-accent text-white font-bold py-2 px-4 rounded hover:bg-accent-hover">+ 신규 등록</button>
+            </Link>
           </div>
         </div>
 
         <div className="flex-grow flex flex-col overflow-hidden">
-          {/* --- 헤더 영역 --- */}
           <div className="flex-shrink-0 overflow-x-auto">
             <table className="w-full text-sm text-left table-fixed">
               <TableColGroup visibleColumns={visibleColumns} />
@@ -159,7 +160,6 @@ const ProjectList = () => {
             </table>
           </div>
 
-          {/* --- 바디 영역 (스크롤 가능) --- */}
           <div className="flex-grow overflow-auto">
             <table className="w-full text-sm text-left table-fixed">
               <TableColGroup visibleColumns={visibleColumns} />

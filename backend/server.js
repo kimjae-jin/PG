@@ -32,7 +32,6 @@ app.get('/api/projects', (req, res) => {
   });
 });
 
-// [핵심] 관계사 목록 API - '거래횟수' 동적 계산 추가
 app.get('/api/companies', (req, res) => {
   const sql = `
     SELECT 
@@ -46,7 +45,6 @@ app.get('/api/companies', (req, res) => {
     res.json(rows);
   });
 });
-
 
 app.get('/api/billing', (req, res) => {
     const sql = `
@@ -73,9 +71,43 @@ app.get('/api/billing', (req, res) => {
 });
 
 app.get('/api/projects/:id', (req, res) => { const sql = `SELECT p.*, COALESCE((SELECT SUM(deposit_amount) FROM billing_history WHERE project_no = p.project_no), 0) as billed_amount, CASE WHEN p.equity_amount > 0 THEN CAST(COALESCE((SELECT SUM(deposit_amount) FROM billing_history WHERE project_no = p.project_no), 0) * 100 / p.equity_amount AS INTEGER) ELSE 0 END as equity_rate FROM projects p WHERE p.id = ?`; db.get(sql, [req.params.id], (err, row) => { if (err) return res.status(500).json({ error: err.message }); if (!row) return res.status(404).json({ error: '프로젝트를 찾을 수 없습니다.' }); res.json(row); }); });
+
+app.put('/api/projects/:id', (req, res) => {
+    const { id } = req.params;
+    const { project_no, project_name, client, manager, status, contract_date, start_date, end_date, completion_date, contract_amount, equity_amount, remarks, special_notes } = req.body;
+    const sql = `UPDATE projects SET project_no = ?, project_name = ?, client = ?, manager = ?, status = ?, contract_date = ?, start_date = ?, end_date = ?, completion_date = ?, contract_amount = ?, equity_amount = ?, remarks = ?, special_notes = ? WHERE id = ?`;
+    const params = [ project_no, project_name, client, manager, status, contract_date, start_date, end_date, completion_date, contract_amount, equity_amount, remarks, special_notes, id ];
+    db.run(sql, params, function(err) {
+        if (err) return res.status(400).json({ error: err.message });
+        res.json({ message: 'Success', changes: this.changes });
+    });
+});
+
+app.post('/api/projects', (req, res) => {
+    const { project_no, project_name, client, manager, status, contract_date, start_date, end_date, completion_date, contract_amount, equity_amount, remarks, special_notes } = req.body;
+    const sql = `INSERT INTO projects ( project_no, project_name, client, manager, status, contract_date, start_date, end_date, completion_date, contract_amount, equity_amount, remarks, special_notes ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    const params = [ project_no, project_name, client, manager, status, contract_date, start_date, end_date, completion_date, contract_amount, equity_amount, remarks, special_notes ];
+    db.run(sql, params, function(err) {
+        if (err) { console.error("DB INSERT ERROR:", err.message); return res.status(400).json({ error: err.message }); }
+        res.status(201).json({ id: this.lastID, message: '프로젝트가 성공적으로 생성되었습니다.' });
+    });
+});
+
 app.get('/api/projects/:id/notes', (req, res) => { const getProjectNoSql = "SELECT project_no FROM projects WHERE id = ?"; db.get(getProjectNoSql, [req.params.id], (err, project) => { if (err) return res.status(500).json({ error: err.message }); if (!project) return res.status(404).json({ error: '프로젝트를 찾을 수 없습니다.' }); const getNotesSql = "SELECT * FROM special_notes_log WHERE project_no = ? ORDER BY created_at DESC"; db.all(getNotesSql, [project.project_no], (err, rows) => { if (err) return res.status(500).json({ error: err.message }); res.json(rows); }); }); });
 app.post('/api/projects/:id/notes', (req, res) => { const { note } = req.body; if (!note) return res.status(400).json({ error: '내용이 필요합니다.' }); const getProjectNoSql = "SELECT project_no FROM projects WHERE id = ?"; db.get(getProjectNoSql, [req.params.id], (err, project) => { if (err) return res.status(500).json({ error: err.message }); if (!project) return res.status(404).json({ error: '프로젝트를 찾을 수 없습니다.' }); const insertNoteSql = "INSERT INTO special_notes_log (project_no, note) VALUES (?, ?)"; const stmt = db.prepare(insertNoteSql); stmt.run(project.project_no, note, function(err) { if (err) return res.status(500).json({ error: err.message }); db.get("SELECT * FROM special_notes_log WHERE id = ?", [this.lastID], (err, newLog) => { if (err) return res.status(500).json({ error: err.message }); res.status(201).json(newLog); }); }); stmt.finalize(); }); });
 app.get('/api/projects/:id/billing', (req, res) => { const getProjectNoSql = "SELECT project_no FROM projects WHERE id = ?"; db.get(getProjectNoSql, [req.params.id], (err, project) => { if (err) return res.status(500).json({ error: err.message }); if (!project) return res.status(404).json({ error: '프로젝트를 찾을 수 없습니다.' }); const getBillingSql = "SELECT * FROM billing_history WHERE project_no = ? ORDER BY request_date ASC, deposit_date ASC"; db.all(getBillingSql, [project.project_no], (err, rows) => { if (err) return res.status(500).json({ error: err.message }); res.json(rows); }); }); });
 app.post('/api/billing', async (req, res) => { const { project_no, request_type, request_date, request_amount, deposit_date, deposit_amount, note } = req.body; if (!project_no) return res.status(400).json({ error: '프로젝트 번호는 필수입니다.' }); const sql = `INSERT INTO billing_history (project_no, request_type, request_date, request_amount, deposit_date, deposit_amount, note) VALUES (?, ?, ?, ?, ?, ?, ?)`; db.run(sql, [project_no, request_type, request_date, request_amount, deposit_date, deposit_amount, note], async function(err) { if (err) return res.status(500).json({ error: err.message }); try { await updateProjectFinancesAndStatus(db, project_no); db.get("SELECT * FROM billing_history WHERE id = ?", [this.lastID], (err, newBilling) => { if (err) return res.status(500).json({ error: err.message }); res.status(201).json(newBilling); }); } catch (updateErr) { res.status(500).json({ error: `데이터는 추가되었으나, 프로젝트 정보 업데이트 중 오류 발생: ${updateErr.message}` }); } }); });
+
+app.get('/api/projects/:id/sub-contracts', (req, res) => {
+    const { id } = req.params;
+    const sql = `SELECT * FROM sub_contracts WHERE project_id = ? ORDER BY contract_date ASC`;
+    db.all(sql, [id], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.json(rows);
+    });
+});
+
 async function startServer() { try { console.log("데이터베이스 연결을 시도합니다..."); console.log("데이터베이스에 성공적으로 연결되었습니다."); await initializeDatabase(db); app.listen(PORT, () => { console.log(`모든 준비 완료. 백엔드 서버가 포트 ${PORT}에서 외부 요청을 받기 시작합니다.`); }); } catch (err) { console.error("서버 시동 중 치명적인 오류 발생:", err); process.exit(1); } }
 startServer();
