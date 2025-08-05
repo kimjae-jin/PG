@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { Search, Plus, List, LayoutGrid } from 'lucide-react';
 import ColumnSelector from '../components/ColumnSelector';
+import ProjectCard from '../components/ProjectCard';
 
 // --- 단일 진실 공급원: 컬럼 정의 ---
 const ALL_COLUMNS = {
@@ -20,9 +22,14 @@ const ALL_COLUMNS = {
   special_notes: { header: '특이사항', width: '12rem' },
   remarks: { header: '비고', width: '7rem' },
 };
-
 const FIXED_COLUMNS = ['status', 'project_no'];
 
+const LOCAL_STORAGE_KEYS = {
+  visibleColumns: 'projectList_visibleColumns_v2',
+  viewMode: 'projectList_viewMode_v1',
+};
+
+// [수정] 함수 정의 위치를 컴포넌트 외부로 이동하여 정리
 const getInitialVisibleColumns = () => {
   const isMobile = window.innerWidth < 768;
   if (isMobile) {
@@ -30,8 +37,6 @@ const getInitialVisibleColumns = () => {
   }
   return { status: true, project_no: true, project_name: true, client: true, contract_amount: false, equity_amount: true, equity_rate: true, progress_rate: true, contract_date: false, start_date: true, end_date: true, completion_date: false, manager: true, special_notes: false, remarks: false, };
 };
-
-const LOCAL_STORAGE_KEY = 'projectList_visibleColumns_v2';
 
 const TableColGroup = ({ visibleColumns }) => (
   <colgroup>
@@ -50,20 +55,12 @@ const ProjectList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRows, setSelectedRows] = useState(new Set());
   const [showOnlySelected, setShowOnlySelected] = useState(false);
+  const [visibleColumns, setVisibleColumns] = useState(getInitialVisibleColumns);
+  const [viewMode, setViewMode] = useState(() => localStorage.getItem(LOCAL_STORAGE_KEYS.viewMode) || 'list');
   const navigate = useNavigate();
 
-  const [visibleColumns, setVisibleColumns] = useState(() => {
-    try {
-        const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-        return saved ? JSON.parse(saved) : getInitialVisibleColumns();
-    } catch(e) {
-        return getInitialVisibleColumns();
-    }
-  });
-
-  useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(visibleColumns));
-  }, [visibleColumns]);
+  useEffect(() => { localStorage.setItem(LOCAL_STORAGE_KEYS.visibleColumns, JSON.stringify(visibleColumns)); }, [visibleColumns]);
+  useEffect(() => { localStorage.setItem(LOCAL_STORAGE_KEYS.viewMode, viewMode); }, [viewMode]);
 
   useEffect(() => {
     fetch('http://localhost:5001/api/projects')
@@ -114,76 +111,75 @@ const ProjectList = () => {
   };
 
   if (loading) return <div className="p-6 text-center text-text-muted">프로젝트 목록을 불러오는 중입니다...</div>;
-  if (error) return <div className="p-6 text-center text-text-muted">{error}</div>;
+  if (error) return <div className="p-6 text-center text-red-400">{error}</div>;
 
   const isAllSelected = filteredProjects.length > 0 && selectedRows.size === filteredProjects.length;
 
   return (
-    <div className="flex flex-col h-full p-4 md:p-6">
-      <div className="flex flex-col h-full bg-card-bg rounded-lg shadow">
+    <div className="flex flex-col h-full p-4 md:p-6 bg-transparent">
+      <div className="flex flex-col h-full bg-card-bg rounded-lg shadow-lg">
         <div className="flex-shrink-0 flex justify-between items-center p-4 border-b border-separator flex-wrap gap-2">
           <div className="flex items-center space-x-2 flex-wrap gap-2">
             <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="bg-input-bg border border-separator rounded-md px-2 py-1.5 text-sm">
               <option value="전체">상태 (전체)</option> <option value="진행중">진행중</option> <option value="완료">완료</option>
             </select>
-            <div className="flex items-center space-x-1">
-              <input type="checkbox" id="showOnlySelected" checked={showOnlySelected} onChange={(e) => setShowOnlySelected(e.target.checked)} className="h-4 w-4 rounded"/>
-              <label htmlFor="showOnlySelected" className="text-sm text-text-muted cursor-pointer">선택 항목만 보기</label>
-            </div>
+            <div className="flex items-center space-x-1"><input type="checkbox" id="showOnlySelected" checked={showOnlySelected} onChange={(e) => setShowOnlySelected(e.target.checked)} className="h-4 w-4 rounded"/><label htmlFor="showOnlySelected" className="text-sm text-text-muted cursor-pointer">선택 항목만</label></div>
             <input type="text" placeholder="프로젝트 넘버/계약명/발주처 검색..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-64 bg-input-bg border border-separator rounded-md px-2 py-1.5 text-sm" />
           </div>
           <div className="flex items-center space-x-2">
-            <ColumnSelector allColumns={ALL_COLUMNS} visibleColumns={visibleColumns} setVisibleColumns={setVisibleColumns} fixedColumns={FIXED_COLUMNS}/>
-            {/* [수정] Link의 to 경로도 일관성을 위해 /projects/new 로 변경합니다. */}
-            <Link to="/projects/new">
-              <button className="bg-accent text-white font-bold py-2 px-4 rounded hover:bg-accent-hover">+ 신규 등록</button>
-            </Link>
+            <div className="flex items-center bg-input-bg border border-separator rounded-md p-1">
+                <button onClick={() => setViewMode('list')} className={`p-1.5 rounded ${viewMode === 'list' ? 'bg-accent text-white' : 'text-text-muted hover:bg-gray-700'}`}><List size={18} /></button>
+                <button onClick={() => setViewMode('card')} className={`p-1.5 rounded ${viewMode === 'card' ? 'bg-accent text-white' : 'text-text-muted hover:bg-gray-700'}`}><LayoutGrid size={18} /></button>
+            </div>
+            {viewMode === 'list' && <ColumnSelector allColumns={ALL_COLUMNS} visibleColumns={visibleColumns} setVisibleColumns={setVisibleColumns} fixedColumns={FIXED_COLUMNS}/>}
+            <Link to="/projects/new"><button className="flex items-center bg-accent text-white font-bold py-2 px-4 rounded hover:bg-accent-hover"><Plus size={16} className="mr-1"/> 신규 등록</button></Link>
           </div>
         </div>
-
-        <div className="flex-grow flex flex-col overflow-hidden">
-          <div className="flex-shrink-0 overflow-x-auto">
-            <table className="w-full text-sm text-left table-fixed">
-              <TableColGroup visibleColumns={visibleColumns} />
-              <thead className="bg-table-header text-table-header-text uppercase">
-                <tr>
-                  <th className="p-2 text-center">
-                    <input type="checkbox" onChange={handleSelectAll} checked={isAllSelected} className="h-4 w-4 rounded" />
-                  </th>
-                  {Object.keys(ALL_COLUMNS).map(colKey => visibleColumns[colKey] && (
-                    <th key={colKey} className="p-2 text-center whitespace-nowrap">
-                      {ALL_COLUMNS[colKey].header}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-            </table>
-          </div>
-
-          <div className="flex-grow overflow-auto">
-            <table className="w-full text-sm text-left table-fixed">
-              <TableColGroup visibleColumns={visibleColumns} />
-              <tbody>
-                {filteredProjects.map(project => (
-                  <tr key={project.id} className="hover:bg-tab-hover">
-                    <td className="p-2 text-center">
-                      <input type="checkbox" checked={selectedRows.has(project.id)} onChange={() => handleSelectRow(project.id)} onClick={(e) => e.stopPropagation()} className="h-4 w-4 rounded" />
-                    </td>
-                    {Object.keys(ALL_COLUMNS).map(colKey => visibleColumns[colKey] && (
-                      <td key={colKey} onClick={() => navigate(`/projects/${project.id}`)} className={`p-2 whitespace-nowrap overflow-hidden text-ellipsis cursor-pointer ${['contract_amount', 'equity_amount'].includes(colKey) ? 'text-right font-mono' : 'text-center'}`} title={project[colKey]}>
-                        {colKey === 'status' ? <span className={`px-2 py-1 text-xs font-semibold rounded-full ${project.status === '완료' ? 'bg-blue-200 text-blue-800' : 'bg-green-200 text-green-800'}`}>{project.status}</span> :
-                         ['contract_date', 'start_date', 'end_date', 'completion_date'].includes(colKey) ? formatDate(project[colKey]) :
-                         ['contract_amount', 'equity_amount'].includes(colKey) ? formatCurrency(project[colKey]) :
-                         ['equity_rate', 'progress_rate'].includes(colKey) ? `${project[colKey] || 0}%` :
-                         project[colKey]}
-                      </td>
-                    ))}
+        
+        {viewMode === 'list' ? (
+          <div className="flex-grow flex flex-col overflow-hidden">
+            <div className="flex-shrink-0 overflow-x-auto">
+              <table className="w-full text-sm text-left table-fixed">
+                <TableColGroup visibleColumns={visibleColumns} />
+                <thead className="bg-table-header text-table-header-text uppercase">
+                  <tr>
+                    <th className="p-2 text-center"><input type="checkbox" onChange={handleSelectAll} checked={isAllSelected} className="h-4 w-4 rounded" /></th>
+                    {Object.keys(ALL_COLUMNS).map(colKey => visibleColumns[colKey] && (<th key={colKey} className="p-2 text-center whitespace-nowrap">{ALL_COLUMNS[colKey].header}</th>))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+              </table>
+            </div>
+            <div className="flex-grow overflow-auto">
+              <table className="w-full text-sm text-left table-fixed">
+                <TableColGroup visibleColumns={visibleColumns} />
+                <tbody>
+                  {filteredProjects.map(project => (
+                    <tr key={project.id} className="hover:bg-tab-hover">
+                      <td className="p-2 text-center"><input type="checkbox" checked={selectedRows.has(project.id)} onChange={() => handleSelectRow(project.id)} onClick={(e) => e.stopPropagation()} className="h-4 w-4 rounded" /></td>
+                      {Object.keys(ALL_COLUMNS).map(colKey => visibleColumns[colKey] && (
+                        <td key={colKey} onClick={() => navigate(`/projects/${project.id}`)} className={`p-2 whitespace-nowrap overflow-hidden text-ellipsis cursor-pointer ${['contract_amount', 'equity_amount'].includes(colKey) ? 'text-right font-mono' : 'text-center'}`} title={project[colKey]}>
+                          {colKey === 'status' ? <span className={`px-2 py-1 text-xs font-semibold rounded-full ${project.status === '완료' ? 'bg-blue-200 text-blue-800' : 'bg-green-200 text-green-800'}`}>{project.status}</span> :
+                           ['contract_date', 'start_date', 'end_date', 'completion_date'].includes(colKey) ? formatDate(project[colKey]) :
+                           ['contract_amount', 'equity_amount'].includes(colKey) ? formatCurrency(project[colKey]) :
+                           ['equity_rate', 'progress_rate'].includes(colKey) ? `${project[colKey] || 0}%` :
+                           project[colKey]}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="flex-grow overflow-auto p-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {filteredProjects.map(project => (
+                <ProjectCard key={project.id} project={project} isSelected={selectedRows.has(project.id)} onSelect={handleSelectRow} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
