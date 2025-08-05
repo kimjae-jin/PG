@@ -9,10 +9,12 @@
     "fix-schema": "node fix_schema.js",
     "add-column": "node add_treasurer_column.js",
     "inject-settings": "node inject_settings.js",
-    "setup-assets": "node setup_asset_management.js"
+    "setup-assets": "node setup_asset_management.js",
+    "import-employees": "node import_employees.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
+    "csv-parse": "^5.5.6",
     "express": "^4.19.2",
     "multer": "^2.0.2",
     "pg-monorepo-v5.3": "file:..",
