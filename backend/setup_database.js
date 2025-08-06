@@ -6,13 +6,11 @@ const DB_PATH = path.resolve(process.cwd(), 'backend', 'database.db');
 const DB_BACKUP_PATH = path.resolve(process.cwd(), 'backend', `database.db.bak.${Date.now()}`);
 
 const queries = [
-    `CREATE TABLE Projects ( projectId INTEGER PRIMARY KEY AUTOINCREMENT, projectNo TEXT UNIQUE, category TEXT, projectName TEXT, clientId INTEGER, totalAmount REAL, equityAmount REAL, contractDate DATE, startDate DATE, endDate DATE, completionDate DATE, remarks TEXT );`,
-    `CREATE TABLE Companies ( companyId INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, registrationNumber TEXT UNIQUE, address TEXT, contact TEXT, email TEXT, ceoName TEXT, type TEXT );`,
-    `CREATE TABLE Employees ( employeeId TEXT PRIMARY KEY, name TEXT NOT NULL, dateOfBirth DATE, emergencyContact TEXT, email TEXT, address TEXT, hireDate DATE, department TEXT, position TEXT, status TEXT DEFAULT '재직' );`,
-    `CREATE TABLE Qualifications ( qualificationId INTEGER PRIMARY KEY AUTOINCREMENT, employeeId TEXT NOT NULL, name TEXT, issueDate DATE, expiryDate DATE, issuer TEXT, certificateFile TEXT, FOREIGN KEY (employeeId) REFERENCES Employees (employeeId) ON DELETE CASCADE );`,
-    `CREATE TABLE Invoices ( invoiceId INTEGER PRIMARY KEY AUTOINCREMENT, approvalNo TEXT NOT NULL UNIQUE, issueDate DATE, clientRegNo TEXT, totalAmount REAL, supplyTotal REAL, taxTotal REAL, projectId INTEGER, FOREIGN KEY (projectId) REFERENCES Projects (projectId) );`,
-    `CREATE TABLE InvoiceItems ( itemId INTEGER PRIMARY KEY AUTOINCREMENT, invoiceId INTEGER NOT NULL, itemDate DATE, itemName TEXT, supplyAmount REAL, taxAmount REAL, FOREIGN KEY (invoiceId) REFERENCES Invoices (invoiceId) );`,
-    `CREATE TABLE SystemSettings ( id INTEGER PRIMARY KEY CHECK (id = 1), companyName TEXT, companyCeoName TEXT, companyAddress TEXT, companyBusinessNumber TEXT, companyPhoneNumber TEXT, companySealUrl TEXT, companyUsageSealUrl TEXT );`
+    `CREATE TABLE Projects ( projectId INTEGER PRIMARY KEY AUTOINCREMENT, projectNo TEXT UNIQUE, category TEXT, projectName TEXT, clientName TEXT, totalAmount REAL, equityAmount REAL, contractDate DATE, startDate DATE, endDate DATE, completionDate DATE, remarks TEXT );`,
+    `CREATE TABLE Companies ( companyId INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, registrationNumber TEXT UNIQUE, address TEXT, ceoName TEXT );`,
+    `CREATE TABLE Employees ( employeeId TEXT PRIMARY KEY, name TEXT NOT NULL, dateOfBirth DATE, emergencyContact TEXT, email TEXT, address TEXT, hireDate DATE, department TEXT, position TEXT, status TEXT );`,
+    `CREATE TABLE Invoices ( invoiceId INTEGER PRIMARY KEY AUTOINCREMENT, approvalNo TEXT NOT NULL UNIQUE, clientRegNo TEXT, clientName TEXT, issueDate DATE, totalAmount REAL );`,
+    `CREATE TABLE InvoiceItems ( itemId INTEGER PRIMARY KEY AUTOINCREMENT, invoiceId INTEGER NOT NULL, itemName TEXT, supplyAmount REAL, taxAmount REAL, FOREIGN KEY (invoiceId) REFERENCES Invoices (invoiceId) );`
 ];
 
 function setupDatabase() {
@@ -35,7 +33,6 @@ function setupDatabase() {
                     else console.log(`✅ 테이블 생성 성공: ${query.match(/CREATE TABLE (\w+)/)[1]}`);
                 });
             });
-            db.run('INSERT OR IGNORE INTO SystemSettings (id) VALUES (1)');
             db.close((err) => {
                 if (err) console.error('❌ DB 연결 종료 실패:', err.message);
                 else console.log('🎉 데이터베이스 재창조 완료!');
