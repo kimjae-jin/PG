@@ -8,6 +8,7 @@
     "build": "vite build"
   },
   "dependencies": {
+    "lucide-react": "^0.536.0",
     "pg-monorepo-v5.2": "file:..",
     "pg-monorepo-v5.3": "file:..",
     "react": "^18.2.0",
