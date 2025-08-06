@@ -4,7 +4,8 @@ node_modules/
 /frontend/node_modules/
 
 # DB file
-/backend/database.db
+# We are intentionally tracking the database file for this project's specific needs.
+# /backend/database.db
 
 # Build output
 /frontend/dist/

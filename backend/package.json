@@ -1,24 +1,23 @@
 {
-  "name": "backend",
-  "version": "5.3.0",
+  "name": "pg-backend",
+  "version": "6.0.0",
   "type": "module",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "update-schema": "node update_schema.js",
-    "fix-schema": "node fix_schema.js",
-    "add-column": "node add_treasurer_column.js",
-    "inject-settings": "node inject_settings.js",
-    "setup-assets": "node setup_asset_management.js",
-    "import-employees": "node import_employees.js"
+    "dev": "nodemon server.js",
+    "db:setup": "node setup_database.js",
+    "db:import": "node import_all_data.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
     "csv-parse": "^5.5.6",
     "express": "^4.19.2",
-    "multer": "^2.0.2",
-    "pg-monorepo-v5.3": "file:..",
-    "puppeteer": "^24.15.0",
+    "multer": "^1.4.5-lts.1",
+    "puppeteer": "^22.9.0",
     "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
   }
 }
