@@ -7,7 +7,9 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "db:setup": "node setup_database.js",
-    "db:import": "node import_all_data.js"
+    "db:import": "node import_all_data.js",
+    "parse-employees": "node parse_employees.js",
+    "db:rebuild": "node setup_and_import.js"
   },
   "dependencies": {
     "cors": "^2.8.5",

@@ -1,0 +1,352 @@
+[
+  {
+    "employeeId": "H001",
+    "dateOfBirth": "1976-05-05",
+    "emergencyContact": "01045649022",
+    "email": "jongjini76@naver.com",
+    "department": "토목부",
+    "position": "이사",
+    "hireDate": "2016-12-31",
+    "address": "제주특별자치도 제주시 화삼로32, 201동 801호(화북이동 LH2단지)"
+  },
+  {
+    "employeeId": "H002",
+    "dateOfBirth": "1968-07-11",
+    "emergencyContact": "01044409895",
+    "email": "kyung6466@daim.net",
+    "department": "측량부",
+    "position": "상무",
+    "hireDate": "2016-12-31",
+    "address": "제주 제주시 조천읍 조천리2859-4번지"
+  },
+  {
+    "employeeId": "H003",
+    "dateOfBirth": "1978-06-03",
+    "emergencyContact": "01062325151",
+    "email": "popo5151@hanmail.net",
+    "department": "토목부",
+    "position": "대표이사",
+    "hireDate": "2016-12-31",
+    "address": "제주 제주시 원남6길 55-1, 102동 402호"
+  },
+  {
+    "employeeId": "H004",
+    "dateOfBirth": "1972-03-28",
+    "emergencyContact": "01040060485",
+    "email": "casthan@hanmail.net",
+    "department": "토목부",
+    "position": "사장",
+    "hireDate": "2016-12-31",
+    "address": "제주특별자치도 제주시 원노형남1길 11, 1319호"
+  },
+  {
+    "employeeId": "H005",
+    "dateOfBirth": "1982-06-18",
+    "emergencyContact": "01046922949",
+    "email": "2ijms@naver.com",
+    "department": "토목부",
+    "position": "부장",
+    "hireDate": "2016-12-31",
+    "address": "제주 제주시 동한두기길 3(용담일동)"
+  },
+  {
+    "employeeId": "H006",
+    "dateOfBirth": "1979-06-25",
+    "emergencyContact": "01038488026",
+    "email": "98scariet@naver.com",
+    "department": "조경부",
+    "position": "팀장",
+    "hireDate": "2018-01-31",
+    "address": "부산 기장군 정관읍 정관5로 12 207동 201호"
+  },
+  {
+    "employeeId": "H007",
+    "dateOfBirth": "1944-03-08",
+    "emergencyContact": "01052155001",
+    "email": null,
+    "department": "토목부",
+    "position": "고문",
+    "hireDate": "2018-07-31",
+    "address": "경기 광명시 소하로 56, 광명소하 휴먼시아 3단지 아파트 306동 601호"
+  },
+  {
+    "employeeId": "H008",
+    "dateOfBirth": "1972-06-28",
+    "emergencyContact": "01099691176",
+    "email": "e7206@naver.com",
+    "department": "토목부",
+    "position": "이사",
+    "hireDate": "2018-12-18",
+    "address": "제주특별자치도 제주시 태성로 2길 21"
+  },
+  {
+    "employeeId": "H009",
+    "dateOfBirth": "1980-03-01",
+    "emergencyContact": "01035798577",
+    "email": "jmskara@kakao.com",
+    "department": "수자원부",
+    "position": "부장",
+    "hireDate": "2019-03-31",
+    "address": "부산광역시 북구 백양대로1050번길11-1"
+  },
+  {
+    "employeeId": "H010",
+    "dateOfBirth": "1980-03-01",
+    "emergencyContact": "01099988864",
+    "email": null,
+    "department": "조경부",
+    "position": "과장",
+    "hireDate": "2019-03-31",
+    "address": "부산광역시 기장군 정관읍 정관4로 24 동일스위트113-1604"
+  },
+  {
+    "employeeId": "H011",
+    "dateOfBirth": "1992-12-23",
+    "emergencyContact": "01053778638",
+    "email": "wwewwer1@nate.com",
+    "department": "토목부",
+    "position": "과장",
+    "hireDate": "2019-07-07",
+    "address": "제주특별자치도 제주시 이도2동 438번지 혜성아파트108-101"
+  },
+  {
+    "employeeId": "H012",
+    "dateOfBirth": "2019-08-31",
+    "emergencyContact": "01036948669",
+    "email": null,
+    "department": "측량부",
+    "position": "이사",
+    "hireDate": "2019-08-31",
+    "address": "제주특별자치도 제주시 제원2길 28 1층101호"
+  },
+  {
+    "employeeId": "H013",
+    "dateOfBirth": "1990-06-04",
+    "emergencyContact": "01066610851",
+    "email": "kangrudgns12@naver.com",
+    "department": "토목부",
+    "position": "과장",
+    "hireDate": "2020-02-29",
+    "address": "서귀포시 1100로 36, 201동 203호(중문동,중문메리디안연립)"
+  },
+  {
+    "employeeId": "H014",
+    "dateOfBirth": "1979-09-01",
+    "emergencyContact": "0103699884",
+    "email": "kdh854@hanmail.net",
+    "department": "토목부",
+    "position": "이사",
+    "hireDate": "2021-01-31",
+    "address": "제주특별자치도 제주시 애월읍 하광로 326, 101동 108호"
+  },
+  {
+    "employeeId": "H015",
+    "dateOfBirth": "1984-09-15",
+    "emergencyContact": "01054782991",
+    "email": null,
+    "department": "토목부",
+    "position": "부장",
+    "hireDate": "2021-01-31",
+    "address": "부산 남구 감만1동 유창그린아파트 108동 1505호"
+  },
+  {
+    "employeeId": "H016",
+    "dateOfBirth": "1978-01-02",
+    "emergencyContact": "01028290302",
+    "email": "ghost2005@hanmail.net",
+    "department": "교통부",
+    "position": "이사",
+    "hireDate": "2021-06-30",
+    "address": "경상북도 예천군 호명면 양지로 14, 220동 902호"
+  },
+  {
+    "employeeId": "H017",
+    "dateOfBirth": "1972-02-05",
+    "emergencyContact": "01062054106",
+    "email": "smsy0726@naver.com",
+    "department": "토목부",
+    "position": "전무",
+    "hireDate": "2022-01-05",
+    "address": "제주특별자치도 제주시 신설로9길 12-4,201호(이도이동, 정현빌)"
+  },
+  {
+    "employeeId": "H018",
+    "dateOfBirth": "1993-05-25",
+    "emergencyContact": "01049169058",
+    "email": "seokwon9058@daum.net",
+    "department": "토목부",
+    "position": "대리",
+    "hireDate": "2022-06-30",
+    "address": "제주시 일주서로 7845"
+  },
+  {
+    "employeeId": "H019",
+    "dateOfBirth": "1982-03-23",
+    "emergencyContact": "01096119068",
+    "email": null,
+    "department": "도시부",
+    "position": "부장",
+    "hireDate": "2022-12-31",
+    "address": "서울특별시 양천구 목동서로 377, 에이동 601호(신정동, 이스타빌 3차)"
+  },
+  {
+    "employeeId": "H020",
+    "dateOfBirth": "1956-04-24",
+    "emergencyContact": "01036912558",
+    "email": null,
+    "department": "건축부",
+    "position": "고문",
+    "hireDate": "2023-02-28",
+    "address": "제주시 외도1동 486-8 한라주택 A동 501호"
+  },
+  {
+    "employeeId": "H021",
+    "dateOfBirth": "1988-05-28",
+    "emergencyContact": "01040728685",
+    "email": null,
+    "department": "건축부",
+    "position": "소장",
+    "hireDate": "2023-02-28",
+    "address": "서울특별시 서초구 양재천로 113-6, 4층(양재동)"
+  },
+  {
+    "employeeId": "H022",
+    "dateOfBirth": "1956-06-21",
+    "emergencyContact": "01036912695",
+    "email": null,
+    "department": "토목부",
+    "position": "전무",
+    "hireDate": "2023-07-31",
+    "address": "제주시 아란1길 28-1, 603동 402호(아라일동, 방선문 6차빌리지)"
+  },
+  {
+    "employeeId": "H023",
+    "dateOfBirth": "1997-06-21",
+    "emergencyContact": "01030974815",
+    "email": null,
+    "department": "토목부",
+    "position": "주임",
+    "hireDate": "2023-08-22",
+    "address": "제주시 천수로 13길 19-5"
+  },
+  {
+    "employeeId": "H024",
+    "dateOfBirth": "1960-09-12",
+    "emergencyContact": "01028705627",
+    "email": "sb2138@hanmail.net",
+    "department": "토목부",
+    "position": "전무",
+    "hireDate": "2023-12-05",
+    "address": "제주특별자치도 제주시 노형10길3 (노형동)"
+  },
+  {
+    "employeeId": "H025",
+    "dateOfBirth": "1968-12-07",
+    "emergencyContact": "01030428744",
+    "email": "batoo87@hanmail.net",
+    "department": "토목부",
+    "position": "이사",
+    "hireDate": "2023-12-21",
+    "address": "제주특별자치도 서귀포시 서호호근로 168-1,101동 401호(서호동, 광진주택)"
+  },
+  {
+    "employeeId": "H026",
+    "dateOfBirth": "1978-02-23",
+    "emergencyContact": "01088799654",
+    "email": "air515@hanmail.net",
+    "department": "토목부",
+    "position": "이사",
+    "hireDate": "2024-02-29",
+    "address": "제주특별자치도 서귀포시 안덕면 중산간서로 1615번길 251-18"
+  },
+  {
+    "employeeId": "H027",
+    "dateOfBirth": "1997-09-04",
+    "emergencyContact": "01054133557",
+    "email": "qa090512@naver.com",
+    "department": "토목부",
+    "position": "주임",
+    "hireDate": "2024-04-30",
+    "address": "제주시 번영로 528,104동708호(봉개동, 제주봉개엘에이치아파트)"
+  },
+  {
+    "employeeId": "H028",
+    "dateOfBirth": "1996-02-20",
+    "emergencyContact": "01065151630",
+    "email": "reallybro@naver.com",
+    "department": "토목부",
+    "position": "주임",
+    "hireDate": "2024-05-12",
+    "address": "제주특별자치도 제주시 동화로1길11, 101동 402호(화북일동, 화북1아파트)"
+  },
+  {
+    "employeeId": "H029",
+    "dateOfBirth": "1960-10-26",
+    "emergencyContact": "01020222596",
+    "email": null,
+    "department": "토목부",
+    "position": "고문",
+    "hireDate": "2024-08-31",
+    "address": "강원도 인제군 인제읍 인제로 228번길 6, 102동 604호(내설악APT)"
+  },
+  {
+    "employeeId": "H030",
+    "dateOfBirth": "1963-08-07",
+    "emergencyContact": "01086635623",
+    "email": null,
+    "department": "토목부",
+    "position": "부사장",
+    "hireDate": "2024-12-31",
+    "address": "제주시 아란9길 22 스위첸아파트 106동1004"
+  },
+  {
+    "employeeId": "H031",
+    "dateOfBirth": "1999-06-13",
+    "emergencyContact": "01034746934",
+    "email": "bobe0517@naver.com",
+    "department": "토목부",
+    "position": "주임",
+    "hireDate": null,
+    "address": "제주시 동고산로 26"
+  },
+  {
+    "employeeId": "HRM01",
+    "dateOfBirth": "1978-05-21",
+    "emergencyContact": "01077997673",
+    "email": "wowls7673@gmail.com",
+    "department": "관리부",
+    "position": "이사",
+    "hireDate": "2022-09-06",
+    "address": "제주시 성신로13-8,503호(연동이화아파트, 연동)"
+  },
+  {
+    "employeeId": "HRM02",
+    "dateOfBirth": "1982-07-06",
+    "emergencyContact": "01025462787",
+    "email": "by5217@naver.com",
+    "department": "관리부",
+    "position": "과장",
+    "hireDate": "2021-06-06",
+    "address": "제주시 동문로 72 유피테르6차 406호"
+  },
+  {
+    "employeeId": "H033",
+    "dateOfBirth": "1971-06-03",
+    "emergencyContact": "01085265305",
+    "email": "ksbwon@naver.com",
+    "department": "도시계획부",
+    "position": "상무",
+    "hireDate": "2025-05-18",
+    "address": "부산광역시 남구 유앤평화로47번길 101,601호(대연동, 대정빌라)"
+  },
+  {
+    "employeeId": "H032",
+    "dateOfBirth": "1940-05-20",
+    "emergencyContact": "01048034478",
+    "email": null,
+    "department": "측량부",
+    "position": "고문",
+    "hireDate": "2025-04-30",
+    "address": "제주시 노형로 66-4, 105동 501호(해안동, 해안 회성푸르니)"
+  }
+]
