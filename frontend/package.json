@@ -12,6 +12,7 @@
     "pg-monorepo-v5.2": "file:..",
     "pg-monorepo-v5.3": "file:..",
     "react": "^18.2.0",
+    "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.23.1"
   },
