@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import { Settings } from 'lucide-react';
 
-// [지침 3] 즉각적인 UI 반응성 확보
 const ColumnSelector = ({ allColumns, visibleColumns, setVisibleColumns, fixedColumns = [] }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleToggle = (key) => {
-    // 부모의 상태를 직접, 그리고 즉시 변경
     setVisibleColumns(prev => ({
       ...prev,
       [key]: !prev[key],
@@ -19,15 +17,17 @@ const ColumnSelector = ({ allColumns, visibleColumns, setVisibleColumns, fixedCo
       newVisibleColumns[key] = true;
     });
     setVisibleColumns(newVisibleColumns);
+    setIsOpen(false); // [지침 2] 전체 선택 후 팝업 자동 닫힘
   };
 
   const handleDeselectAll = () => {
     const newVisibleColumns = {};
     Object.keys(allColumns).forEach(key => {
-      // 고정 컬럼은 선택 해제하지 않음
+      // [지침 1] 고정 컬럼은 선택 해제하지 않음 (always true)
       newVisibleColumns[key] = fixedColumns.includes(key);
     });
     setVisibleColumns(newVisibleColumns);
+    setIsOpen(false); // [지침 2] 전체 해제 후 팝업 자동 닫힘
   };
 
   // 컬럼을 그룹별로 정리
@@ -65,6 +65,7 @@ const ColumnSelector = ({ allColumns, visibleColumns, setVisibleColumns, fixedCo
                         type="checkbox"
                         checked={!!visibleColumns[key]}
                         onChange={() => handleToggle(key)}
+                        // [지침 1] 고정 컬럼 비활성화
                         disabled={fixedColumns.includes(key)}
                         className="h-4 w-4 rounded bg-input-bg border-separator disabled:opacity-50"
                       />
