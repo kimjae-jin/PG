@@ -5,37 +5,24 @@ const ColumnSelector = ({ allColumns, visibleColumns, setVisibleColumns, fixedCo
   const [isOpen, setIsOpen] = useState(false);
 
   const handleToggle = (key) => {
-    setVisibleColumns(prev => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
+    setVisibleColumns(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
   const handleSelectAll = () => {
-    const newVisibleColumns = {};
-    Object.keys(allColumns).forEach(key => {
-      newVisibleColumns[key] = true;
-    });
-    setVisibleColumns(newVisibleColumns);
-    setIsOpen(false); // [지침 2] 전체 선택 후 팝업 자동 닫힘
+    setVisibleColumns(Object.keys(allColumns).reduce((acc, key) => ({...acc, [key]: true}), {}));
+    setIsOpen(false);
   };
 
   const handleDeselectAll = () => {
-    const newVisibleColumns = {};
-    Object.keys(allColumns).forEach(key => {
-      // [지침 1] 고정 컬럼은 선택 해제하지 않음 (always true)
-      newVisibleColumns[key] = fixedColumns.includes(key);
-    });
-    setVisibleColumns(newVisibleColumns);
-    setIsOpen(false); // [지침 2] 전체 해제 후 팝업 자동 닫힘
+    const newVisible = Object.keys(allColumns).reduce((acc, key) => ({...acc, [key]: false}), {});
+    fixedColumns.forEach(key => { newVisible[key] = true; });
+    setVisibleColumns(newVisible);
+    setIsOpen(false);
   };
 
-  // 컬럼을 그룹별로 정리
   const groupedColumns = Object.entries(allColumns).reduce((acc, [key, value]) => {
     const group = value.group || '기타';
-    if (!acc[group]) {
-      acc[group] = [];
-    }
+    if (!acc[group]) acc[group] = [];
     acc[group].push({ key, ...value });
     return acc;
   }, {});
@@ -65,7 +52,6 @@ const ColumnSelector = ({ allColumns, visibleColumns, setVisibleColumns, fixedCo
                         type="checkbox"
                         checked={!!visibleColumns[key]}
                         onChange={() => handleToggle(key)}
-                        // [지침 1] 고정 컬럼 비활성화
                         disabled={fixedColumns.includes(key)}
                         className="h-4 w-4 rounded bg-input-bg border-separator disabled:opacity-50"
                       />

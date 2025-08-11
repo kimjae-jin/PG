@@ -6,30 +6,30 @@ import ColumnSelector from '../components/ColumnSelector';
 import ProjectCard from '../components/ProjectCard';
 
 const ALL_COLUMNS = {
-  status: { header: '상태', sortable: true, width: 'w-24' },
-  project_no: { header: 'P.No', sortable: true, width: 'w-32' },
-  project_name: { header: '계약명', sortable: true, width: 'w-96' },
-  client: { header: '발주처', sortable: true, width: 'w-48' },
-  manager: { header: 'PM', sortable: true, width: 'w-24' },
-  contract_date: { header: '계약일', sortable: true, width: 'w-32' },
-  start_date: { header: '착수일', sortable: true, width: 'w-32' },
-  end_date: { header: '완료예정일', sortable: true, width: 'w-32' },
-  contract_amount: { header: '총 지분금액', sortable: true, width: 'w-40' },
-  balance: { header: '잔금', sortable: true, width: 'w-40' },
-  request_count: { header: '청구횟수', sortable: true, width: 'w-24' },
+  status: { header: '상태', group: '프로젝트', sortable: true, width: 'w-24' },
+  project_no: { header: 'P.No', group: '프로젝트', sortable: true, width: 'w-32' },
+  project_name: { header: '계약명', group: '프로젝트', sortable: true, width: 'w-96' },
+  client: { header: '발주처', group: '계약', sortable: true, width: 'w-48' },
+  manager: { header: 'PM', group: '프로젝트', sortable: true, width: 'w-24' },
+  contract_date: { header: '계약일', group: '계약', sortable: true, width: 'w-32' },
+  start_date: { header: '착수일', group: '계약', sortable: true, width: 'w-32' },
+  end_date: { header: '완료예정일', group: '계약', sortable: true, width: 'w-32' },
+  completion_date: { header: '실제완료일', group: '계약', sortable: true, width: 'w-32' },
+  total_amount: { header: '총 계약금액', group: '재무', sortable: true, width: 'w-40' },
+  contract_amount: { header: '총 지분금액', group: '재무', sortable: true, width: 'w-40' },
+  billed_amount: { header: '총 입금액', group: '재무', sortable: true, width: 'w-40' },
+  balance: { header: '잔금', group: '재무', sortable: true, width: 'w-40' },
+  request_count: { header: '청구횟수', group: '재무', sortable: true, width: 'w-24' },
+  special_notes: { header: '특이사항', group: '기타', sortable: false, width: 'w-96' },
 };
-
-const DEFAULT_COLUMN_ORDER = [
-    'status', 'project_no', 'project_name', 'client', 'manager', 'contract_date', 'start_date', 'end_date', 'contract_amount', 'balance'
-];
-
+const FIXED_COLUMN_IDS = ['status', 'project_no'];
+const DEFAULT_COLUMN_ORDER = Object.keys(ALL_COLUMNS).filter(key => !FIXED_COLUMN_IDS.includes(key));
 const LOCAL_STORAGE_KEYS = {
-  visibleColumns: 'projectList_vFinale_1',
-  viewMode: 'projectList_vFinale_1',
-  sortConfig: 'projectList_vFinale_1',
+  visibleColumns: 'projectList_vFinale_2',
+  viewMode: 'projectList_vFinale_2',
+  sortConfig: 'projectList_vFinale_2',
 };
 
-// [수정] 모든 상태('중지', '취소' 등)를 처리하는 헬퍼 컴포넌트
 const StatusDisplay = ({ status }) => {
     const getStatusStyle = () => {
         switch (status) {
@@ -44,7 +44,6 @@ const StatusDisplay = ({ status }) => {
     const { text, style } = getStatusStyle();
     return <span className={`px-2 py-1 text-xs font-semibold rounded-full ${style}`}>{text}</span>;
 };
-
 
 const ProjectList = () => {
     const [projects, setProjects] = useState([]);
@@ -66,10 +65,9 @@ const ProjectList = () => {
     }, []);
 
     const [visibleColumns, setVisibleColumns] = useState(() => getInitialState(LOCAL_STORAGE_KEYS.visibleColumns, 
-        DEFAULT_COLUMN_ORDER.reduce((acc, key) => ({...acc, [key]: true}), {})
+        Object.keys(ALL_COLUMNS).reduce((acc, key) => ({...acc, [key]: true}), {})
     ));
     const [sortConfig, setSortConfig] = useState(() => getInitialState(LOCAL_STORAGE_KEYS.sortConfig, { key: 'start_date', direction: 'desc' }));
-    // [수정] 기본 보기를 'list'로 설정
     const [viewMode, setViewMode] = useState(() => getInitialState(LOCAL_STORAGE_KEYS.viewMode, 'list'));
 
     useEffect(() => { localStorage.setItem(LOCAL_STORAGE_KEYS.visibleColumns, JSON.stringify(visibleColumns)); }, [visibleColumns]);
@@ -103,7 +101,8 @@ const ProjectList = () => {
     }, [projects, statusFilter, searchTerm, selectedRows, showOnlySelected, sortConfig]);
     
     const displayedColumns = useMemo(() => {
-        return DEFAULT_COLUMN_ORDER.filter(key => visibleColumns[key]);
+        // This is a simplified version without reordering. Reordering requires a more complex state management.
+        return Object.keys(ALL_COLUMNS).filter(key => visibleColumns[key]);
     }, [visibleColumns]);
 
     const requestSort = (key) => setSortConfig(prev => ({ key, direction: prev?.key === key && prev?.direction === 'asc' ? 'desc' : 'asc' }));
@@ -121,7 +120,6 @@ const ProjectList = () => {
             <div className="flex flex-col h-full bg-card-bg rounded-lg shadow-lg">
                 <div className="flex-shrink-0 flex justify-between items-center p-4 border-b border-separator flex-wrap gap-2">
                     <div className="flex items-center space-x-2 flex-wrap gap-2">
-                         {/* [수정] 필터에 모든 상태 추가 */}
                          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="bg-input-bg border-separator rounded-md px-2 py-1.5 text-sm">
                            <option value="전체">상태 (전체)</option>
                            <option value="진행중">진행중</option>
@@ -138,11 +136,10 @@ const ProjectList = () => {
                             <button onClick={() => setViewMode('list')} className={`p-1.5 rounded ${viewMode === 'list' ? 'bg-accent' : ''}`}><List size={18} /></button>
                             <button onClick={() => setViewMode('card')} className={`p-1.5 rounded ${viewMode === 'card' ? 'bg-accent' : ''}`}><LayoutGrid size={18} /></button>
                         </div>
-                        {viewMode === 'list' && <ColumnSelector allColumns={ALL_COLUMNS} visibleColumns={visibleColumns} setVisibleColumns={setVisibleColumns} />}
+                        {viewMode === 'list' && <ColumnSelector allColumns={ALL_COLUMNS} visibleColumns={visibleColumns} setVisibleColumns={setVisibleColumns} fixedColumns={FIXED_COLUMN_IDS} />}
                         <Link to="/projects/new"><button className="flex items-center bg-accent font-bold py-2 px-4 rounded"><Plus size={16} className="mr-1"/> 신규 등록</button></Link>
                     </div>
                 </div>
-
                 {viewMode === 'list' ? (
                     <div className="flex-grow overflow-auto">
                         <table className="w-full text-sm text-left table-fixed">
@@ -161,12 +158,11 @@ const ProjectList = () => {
                                     <tr key={p.id} onDoubleClick={() => navigate(`/projects/${p.id}`)} className="hover:bg-tab-hover cursor-pointer group">
                                         <td className="p-2 text-center"><input type="checkbox" checked={selectedRows.has(p.id)} onChange={() => handleSelectRow(p.id)} onClick={e => e.stopPropagation()} /></td>
                                         {displayedColumns.map(key => (
-                                            <td key={key} className={`p-2 whitespace-nowrap ${['contract_amount', 'balance'].includes(key) ? 'text-right' : 'text-center'}`} title={p[key]}>
+                                            <td key={key} className={`p-2 whitespace-nowrap ${['contract_amount', 'balance', 'total_amount', 'billed_amount'].includes(key) ? 'text-right' : 'text-center'}`} title={p[key]}>
                                                 <div className="truncate">
-                                                    {/* [수정] StatusDisplay 컴포넌트로 상태 표시 로직 교체 */}
                                                     {key === 'status' ? <StatusDisplay status={p.status} /> :
-                                                     ['start_date', 'end_date', 'contract_date'].includes(key) ? formatDate(p[key]) :
-                                                     ['contract_amount', 'balance'].includes(key) ? formatCurrency(p[key]) :
+                                                     ['start_date', 'end_date', 'contract_date', 'completion_date'].includes(key) ? formatDate(p[key]) :
+                                                     ['contract_amount', 'balance', 'total_amount', 'billed_amount'].includes(key) ? formatCurrency(p[key]) :
                                                      p[key] || '-'}
                                                 </div>
                                             </td>
@@ -177,11 +173,10 @@ const ProjectList = () => {
                         </table>
                     </div>
                 ) : (
-                    <div className="flex-grow overflow-auto p-4"><ProjectCard /></div>
+                    <div className="flex-grow overflow-auto p-4"><ProjectCard projects={sortedAndFilteredProjects} selectedRows={selectedRows} onSelectRow={handleSelectRow}/></div>
                 )}
             </div>
         </div>
     );
 };
-
 export default ProjectList;

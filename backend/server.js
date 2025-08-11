@@ -24,9 +24,9 @@ app.use('/uploads', express.static(UPLOADS_DIR));
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        const projectId = req.params.id || req.body.projectId;
+        const projectId = req.params.id || req.projectId;
         if (!projectId) {
-            return cb(new Error("Project ID is missing"), false);
+            return cb(new Error("Project ID could not be determined for storage"), false);
         }
         const dir = path.join(UPLOADS_DIR, String(projectId));
         fs.mkdirSync(dir, { recursive: true });
@@ -144,11 +144,12 @@ app.post('/api/projects/:id/revisions', upload.single('attachment'), (req, res) 
 });
 
 app.post('/api/revisions/:revisionId/attachments', (req, res) => {
-    db.get('SELECT project_id FROM ContractRevisions WHERE id = ?', [req.params.revisionId], (err, revision) => {
+    const revisionId = req.params.revisionId;
+    db.get('SELECT project_id FROM ContractRevisions WHERE id = ?', [revisionId], (err, revision) => {
         if (err) return handleDbError(res, err);
         if (!revision) return res.status(404).json({ error: 'Revision not found' });
         
-        req.body.projectId = revision.project_id;
+        req.projectId = revision.project_id;
         
         const singleUpload = upload.single('attachment');
         singleUpload(req, res, function(err) {
@@ -160,7 +161,7 @@ app.post('/api/revisions/:revisionId/attachments', (req, res) => {
             if (!file) return res.status(400).json({ error: 'No file uploaded' });
 
             const insertAttachmentSql = `INSERT INTO Attachments (project_id, revision_id, file_path, original_filename, mime_type) VALUES (?, ?, ?, ?, ?)`;
-            const params = [revision.project_id, req.params.revisionId, file.path, file.originalname, file.mimetype];
+            const params = [revision.project_id, revisionId, file.path, file.originalname, file.mimetype];
 
             db.run(insertAttachmentSql, params, function(err) {
                 if (err) return handleDbError(res, err);
@@ -169,6 +170,39 @@ app.post('/api/revisions/:revisionId/attachments', (req, res) => {
         });
     });
 });
+
+app.get('/api/projects/:id/attachments', (req, res) => {
+    const sql = `
+        SELECT 
+            a.id, a.original_filename, a.mime_type, a.uploaded_at,
+            cr.revision_type, cr.status_change_date
+        FROM Attachments a
+        LEFT JOIN ContractRevisions cr ON a.revision_id = cr.id
+        WHERE a.project_id = ?
+        ORDER BY a.uploaded_at DESC
+    `;
+    db.all(sql, [req.params.id], (err, rows) => err ? handleDbError(res, err) : res.json(rows));
+});
+
+app.get('/api/attachments/:id', (req, res) => {
+    const sql = `SELECT file_path, original_filename, mime_type FROM Attachments WHERE id = ?`;
+    db.get(sql, [req.params.id], (err, row) => {
+        if (err) return handleDbError(res, err);
+        if (!row || !fs.existsSync(row.file_path)) {
+            return res.status(404).send('File not found.');
+        }
+
+        const canPreview = row.mime_type.startsWith('image/') || row.mime_type === 'application/pdf';
+        
+        if (req.query.download === 'true' || !canPreview) {
+            res.download(row.file_path, row.original_filename);
+        } else {
+            res.setHeader('Content-Type', row.mime_type);
+            res.sendFile(row.file_path);
+        }
+    });
+});
+
 
 app.listen(PORT, () => {
     console.log(`\n> 지휘소(백엔드 서버)가 포트 ${PORT}에서 최종 가동을 시작합니다.`);

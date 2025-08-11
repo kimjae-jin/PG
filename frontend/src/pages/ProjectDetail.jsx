@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { FileText, Download, Plus, Edit, X, Save, Paperclip } from 'lucide-react';
+import { FileText, Download, Plus, Edit, X, Save, Paperclip, Eye, DownloadCloud } from 'lucide-react';
 import AddRevisionModal from '../components/AddRevisionModal';
 import FileUploadModal from '../components/FileUploadModal';
 
@@ -25,10 +25,10 @@ const DetailsTab = ({ projectId, revisions, onAddFileClick }) => {
                                     <td className="p-3">{rev.status_change_date ? new Date(rev.status_change_date).toLocaleDateString('ko-KR') : '-'}</td>
                                     <td className="p-3">{rev.revision_type}</td>
                                     <td className="p-3 whitespace-pre-wrap">{rev.reason}</td>
-                                    <td className="p-3">{new Date(rev.createdAt).toLocaleDateString('ko-KR')}</td>
+                                    <td className="p-3">{rev.createdAt ? new Date(rev.createdAt).toLocaleDateString('ko-KR') : '-'}</td>
                                     <td className="p-3">
                                         {rev.attachment_count > 0 ? (
-                                            <button className="flex items-center text-accent text-xs hover:underline">
+                                            <button onClick={() => window.open(`/projects/${projectId}?tab=files`, '_self')} className="flex items-center text-accent text-xs hover:underline">
                                                 <Paperclip size={12} className="mr-1"/> 파일 보기 ({rev.attachment_count})
                                             </button>
                                         ) : (
@@ -98,7 +98,70 @@ const TechniciansTab = () => {
 };
 
 const DocumentAutomationTab = ({ projectId }) => { const [isGenerating, setIsGenerating] = useState(null); const [error, setError] = useState(null); const documentsToGenerate = [{ name: 'usage_seal_certificate', displayName: '[제주시청] 사용인감계' }]; const handleGenerateDocument = async (templateName, displayName) => { setIsGenerating(templateName); setError(null); try { const response = await fetch('http://localhost:5001/api/documents/generate-pdf', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ projectId: projectId, templateName: templateName }), }); if (!response.ok) { const errData = await response.json(); throw new Error(errData.details || errData.error || '문서 생성에 실패했습니다.'); } const blob = await response.blob(); const url = window.URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `${displayName}.pdf`; document.body.appendChild(a); a.click(); a.remove(); window.URL.revokeObjectURL(url); } catch (err) { console.error('문서 생성 오류:', err); setError(err.message); } finally { setIsGenerating(null); } }; return ( <div className="h-full flex flex-col"> <div className="flex-shrink-0 flex justify-between items-center mb-4"><h4 className="font-bold text-text-color">자동 문서 생성 (제주시청 서식)</h4></div> {error && <p className="text-red-500 mb-4 p-2 bg-red-900/50 rounded-md">오류: {error}</p>} <div className="flex-grow overflow-y-auto rounded-lg border border-separator p-4 space-y-3"> {documentsToGenerate.map(doc => ( <div key={doc.name} className="flex items-center justify-between p-3 bg-tab-inactive rounded-md"> <div className="flex items-center"><FileText className="w-5 h-5 text-accent mr-3" /><span className="text-text-color">{doc.displayName}</span></div> <button onClick={() => handleGenerateDocument(doc.name, doc.displayName)} disabled={isGenerating !== null} className="flex items-center bg-accent text-white font-bold py-2 px-3 rounded text-sm hover:bg-accent-hover disabled:opacity-50 disabled:cursor-wait"><Download className="w-4 h-4 mr-2" />{isGenerating === doc.name ? '생성 중...' : '생성 및 다운로드'}</button> </div> ))} </div> </div> );};
-const FilesTab = () => <p className="p-8 text-center text-text-muted">첨부 파일 목록 (구현 예정)</p>;
+
+const FilesTab = ({ projectId }) => {
+    const [attachments, setAttachments] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const headers = ["파일명", "파일 유형", "연관 이력", "업로드 일시", "작업"];
+    const TableHeader = ({ headers }) => (<thead className="bg-table-header text-table-header-text uppercase text-xs sticky top-0 z-10"><tr>{headers.map(h => <th key={h} className="p-3 font-semibold text-left whitespace-nowrap">{h}</th>)}</tr></thead>);
+    
+    const API_URL = 'http://localhost:5001';
+
+    useEffect(() => {
+        const fetchAttachments = async () => {
+            try {
+                const res = await fetch(`${API_URL}/api/projects/${projectId}/attachments`);
+                if(!res.ok) throw new Error('첨부파일 로딩 실패');
+                const data = await res.json();
+                setAttachments(data);
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchAttachments();
+    }, [projectId]);
+
+    if (isLoading) return <p className="p-8 text-center text-text-muted">첨부 파일 목록을 불러오는 중입니다...</p>;
+
+    return (
+        <div className="h-full flex flex-col">
+            <div className="flex-grow overflow-y-auto rounded-lg border border-separator">
+                <table className="w-full text-left text-sm">
+                    <TableHeader headers={headers} />
+                    <tbody className="divide-y divide-separator">
+                        {attachments && attachments.length > 0 ? (
+                            attachments.map(file => (
+                                <tr key={file.id}>
+                                    <td className="p-3 font-semibold">{file.original_filename}</td>
+                                    <td className="p-3">{file.mime_type}</td>
+                                    <td className="p-3">{`${file.status_change_date ? new Date(file.status_change_date).toLocaleDateString('ko-KR') : ''} ${file.revision_type}`}</td>
+                                    <td className="p-3">{new Date(file.uploaded_at).toLocaleString('ko-KR')}</td>
+                                    <td className="p-3">
+                                        <div className="flex items-center space-x-3">
+                                            {(file.mime_type.startsWith('image/') || file.mime_type === 'application/pdf') &&
+                                                <a href={`${API_URL}/api/attachments/${file.id}`} target="_blank" rel="noopener noreferrer" className="flex items-center text-accent hover:underline">
+                                                    <Eye size={14} className="mr-1" /> 미리보기
+                                                </a>
+                                            }
+                                            <a href={`${API_URL}/api/attachments/${file.id}?download=true`} className="flex items-center text-accent hover:underline">
+                                                <DownloadCloud size={14} className="mr-1" /> 다운로드
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr><td colSpan={headers.length} className="text-center p-8 text-text-muted">- 첨부된 파일이 없습니다 -</td></tr>
+                        )}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+};
+
 const NotesTab = ({ projectId }) => { const [notes, setNotes] = useState([]); const [isLoading, setIsLoading] = useState(true); useEffect(() => { setIsLoading(true); console.warn(`[안정화 모드] NotesTab: /api/projects/${projectId}/notes API 호출이 비활성화되었습니다.`); setNotes([]); setIsLoading(false); }, [projectId]); if (isLoading) return <p className="text-text-muted">특이사항 로딩 중...</p>; return ( <div className="space-y-6"> <div><h4 className="font-bold text-text-color mb-2">특이사항 수동 기록</h4><textarea rows="3" className="w-full p-2 bg-input-bg border border-separator rounded-md text-text-color" placeholder="기록할 내용을 입력하세요... (API 연결 필요)" disabled></textarea><button disabled className="mt-2 bg-accent text-white font-bold py-2 px-4 rounded disabled:opacity-50 disabled:cursor-not-allowed">기록 저장</button></div> <div><h4 className="font-bold text-text-color mb-2">전체 기록</h4><div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">{notes.length > 0 ? notes.map(note => (<div key={note.id} />)) : <p className="p-4 text-center text-text-muted">- 기록이 없습니다 -</p>}</div></div> </div> ); };
 
 
@@ -128,15 +191,19 @@ const ProjectDetail = () => {
         } else {
             setIsLoading(true);
             try {
-                const projectRes = await fetch(`http://localhost:5001/api/projects/${id}`);
+                const [projectRes, revisionsRes] = await Promise.all([
+                    fetch(`http://localhost:5001/api/projects/${id}`),
+                    fetch(`http://localhost:5001/api/projects/${id}/revisions`)
+                ]);
+
                 if (!projectRes.ok) throw new Error('프로젝트 정보를 불러오는 데 실패했습니다.');
+                if (!revisionsRes.ok) throw new Error('프로젝트 이력 정보를 불러오는 데 실패했습니다.');
+
                 const projectData = await projectRes.json();
+                const revisionsData = await revisionsRes.json();
+
                 setProject(projectData);
                 setOriginalProject(projectData);
-
-                const revisionsRes = await fetch(`http://localhost:5001/api/projects/${id}/revisions`);
-                if (!revisionsRes.ok) throw new Error('프로젝트 이력 정보를 불러오는 데 실패했습니다.');
-                const revisionsData = await revisionsRes.json();
                 setRevisions(revisionsData);
             } catch (err) {
                 setError(err.message);
@@ -152,42 +219,26 @@ const ProjectDetail = () => {
 
     const handleSaveRevision = async (formData) => {
         try {
-            const response = await fetch(`http://localhost:5001/api/projects/${id}/revisions`, {
-                method: 'POST',
-                body: formData,
-            });
-            if (!response.ok) {
-                const errData = await response.json();
-                throw new Error(errData.error || '이력 저장에 실패했습니다.');
-            }
+            const response = await fetch(`http://localhost:5001/api/projects/${id}/revisions`, { method: 'POST', body: formData });
+            if (!response.ok) { const errData = await response.json(); throw new Error(errData.error || '이력 저장에 실패했습니다.'); }
             await fetchProjectData();
             setIsAddRevisionModalOpen(false);
             alert('이력이 성공적으로 추가되었습니다.');
-        } catch (err) {
-            alert(`오류: ${err.message}`);
-        }
+        } catch (err) { alert(`오류: ${err.message}`); }
     };
 
-    const handleOpenUploadModal = (revisionId) => {
-        setSelectedRevisionId(revisionId);
-        setIsFileUploadModalOpen(true);
-    };
+    const handleOpenUploadModal = (revisionId) => { setSelectedRevisionId(revisionId); setIsFileUploadModalOpen(true); };
 
     const handleFileUpload = async (revisionId, file) => {
         const formData = new FormData();
         formData.append('attachment', file);
         try {
-            const response = await fetch(`http://localhost:5001/api/revisions/${revisionId}/attachments`, {
-                method: 'POST',
-                body: formData,
-            });
+            const response = await fetch(`http://localhost:5001/api/revisions/${revisionId}/attachments`, { method: 'POST', body: formData });
             if (!response.ok) throw new Error('파일 업로드에 실패했습니다.');
-            await fetchProjectData(); // 데이터 새로고침
+            await fetchProjectData();
             setIsFileUploadModalOpen(false);
             alert('파일이 성공적으로 첨부되었습니다.');
-        } catch (err) {
-            alert(`오류: ${err.message}`);
-        }
+        } catch (err) { alert(`오류: ${err.message}`); }
     };
 
     const handleChange = (e) => setProject(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -212,7 +263,7 @@ const ProjectDetail = () => {
             case 'finance': return <FinanceTab projectId={id} />;
             case 'technicians': return <TechniciansTab />;
             case 'documents': return <DocumentAutomationTab projectId={id} />;
-            case 'files': return <FilesTab />;
+            case 'files': return <FilesTab projectId={id} />;
             case 'notes': return <NotesTab projectId={id} />;
             default: return <DetailsTab projectId={id} revisions={revisions} onAddFileClick={handleOpenUploadModal} />;
         }
