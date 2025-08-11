@@ -25,9 +25,7 @@ app.use('/uploads', express.static(UPLOADS_DIR));
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         const projectId = req.params.id || req.projectId;
-        if (!projectId) {
-            return cb(new Error("Project ID could not be determined for storage"), false);
-        }
+        if (!projectId) { return cb(new Error("Project ID could not be determined for storage"), false); }
         const dir = path.join(UPLOADS_DIR, String(projectId));
         fs.mkdirSync(dir, { recursive: true });
         cb(null, dir);
@@ -153,16 +151,11 @@ app.post('/api/revisions/:revisionId/attachments', (req, res) => {
         
         const singleUpload = upload.single('attachment');
         singleUpload(req, res, function(err) {
-            if (err) {
-                console.error("🔥 UPLOAD ERROR:", err);
-                return res.status(500).json({ error: "File upload error", details: err.message });
-            }
+            if (err) { return res.status(500).json({ error: "File upload error", details: err.message }); }
             const file = req.file;
             if (!file) return res.status(400).json({ error: 'No file uploaded' });
-
             const insertAttachmentSql = `INSERT INTO Attachments (project_id, revision_id, file_path, original_filename, mime_type) VALUES (?, ?, ?, ?, ?)`;
             const params = [revision.project_id, revisionId, file.path, file.originalname, file.mimetype];
-
             db.run(insertAttachmentSql, params, function(err) {
                 if (err) return handleDbError(res, err);
                 res.status(201).json({ message: '파일이 성공적으로 첨부되었습니다.' });
@@ -170,39 +163,6 @@ app.post('/api/revisions/:revisionId/attachments', (req, res) => {
         });
     });
 });
-
-app.get('/api/projects/:id/attachments', (req, res) => {
-    const sql = `
-        SELECT 
-            a.id, a.original_filename, a.mime_type, a.uploaded_at,
-            cr.revision_type, cr.status_change_date
-        FROM Attachments a
-        LEFT JOIN ContractRevisions cr ON a.revision_id = cr.id
-        WHERE a.project_id = ?
-        ORDER BY a.uploaded_at DESC
-    `;
-    db.all(sql, [req.params.id], (err, rows) => err ? handleDbError(res, err) : res.json(rows));
-});
-
-app.get('/api/attachments/:id', (req, res) => {
-    const sql = `SELECT file_path, original_filename, mime_type FROM Attachments WHERE id = ?`;
-    db.get(sql, [req.params.id], (err, row) => {
-        if (err) return handleDbError(res, err);
-        if (!row || !fs.existsSync(row.file_path)) {
-            return res.status(404).send('File not found.');
-        }
-
-        const canPreview = row.mime_type.startsWith('image/') || row.mime_type === 'application/pdf';
-        
-        if (req.query.download === 'true' || !canPreview) {
-            res.download(row.file_path, row.original_filename);
-        } else {
-            res.setHeader('Content-Type', row.mime_type);
-            res.sendFile(row.file_path);
-        }
-    });
-});
-
 
 app.listen(PORT, () => {
     console.log(`\n> 지휘소(백엔드 서버)가 포트 ${PORT}에서 최종 가동을 시작합니다.`);

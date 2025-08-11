@@ -25,9 +25,9 @@ const ALL_COLUMNS = {
 const FIXED_COLUMN_IDS = ['status', 'project_no'];
 const DEFAULT_COLUMN_ORDER = Object.keys(ALL_COLUMNS).filter(key => !FIXED_COLUMN_IDS.includes(key));
 const LOCAL_STORAGE_KEYS = {
-  visibleColumns: 'projectList_vFinale_2',
-  viewMode: 'projectList_vFinale_2',
-  sortConfig: 'projectList_vFinale_2',
+  visibleColumns: 'projectList_vFinale_5',
+  viewMode: 'projectList_vFinale_5',
+  sortConfig: 'projectList_vFinale_5',
 };
 
 const StatusDisplay = ({ status }) => {
@@ -38,6 +38,7 @@ const StatusDisplay = ({ status }) => {
             case '중지': return { text: '중지', style: 'bg-red-500/20 text-red-300' };
             case '취소': return { text: '취소', style: 'bg-gray-500/20 text-gray-300' };
             case '보류': return { text: '보류', style: 'bg-yellow-500/20 text-yellow-300' };
+            case '삭제': return { text: '삭제', style: 'bg-zinc-700/50 text-zinc-400 line-through' };
             default: return { text: status || 'N/A', style: 'bg-gray-700/50 text-gray-400' };
         }
     };
@@ -100,10 +101,8 @@ const ProjectList = () => {
         return data;
     }, [projects, statusFilter, searchTerm, selectedRows, showOnlySelected, sortConfig]);
     
-    const displayedColumns = useMemo(() => {
-        // This is a simplified version without reordering. Reordering requires a more complex state management.
-        return Object.keys(ALL_COLUMNS).filter(key => visibleColumns[key]);
-    }, [visibleColumns]);
+    const visibleFixedColumns = useMemo(() => FIXED_COLUMN_IDS.filter(key => visibleColumns[key]), [visibleColumns]);
+    const visibleDraggableColumns = useMemo(() => DEFAULT_COLUMN_ORDER.filter(key => visibleColumns[key]), [visibleColumns]);
 
     const requestSort = (key) => setSortConfig(prev => ({ key, direction: prev?.key === key && prev?.direction === 'asc' ? 'desc' : 'asc' }));
     const handleSelectAll = (e) => setSelectedRows(e.target.checked ? new Set(sortedAndFilteredProjects.map(p => p.id)) : new Set());
@@ -127,6 +126,7 @@ const ProjectList = () => {
                            <option value="중지">중지</option>
                            <option value="취소">취소</option>
                            <option value="보류">보류</option>
+                           <option value="삭제">삭제</option>
                          </select>
                          <div className="flex items-center space-x-1"><input type="checkbox" id="showOnlySelected" checked={showOnlySelected} onChange={(e) => setShowOnlySelected(e.target.checked)} className="h-4 w-4 rounded"/><label htmlFor="showOnlySelected" className="text-sm text-text-muted cursor-pointer">선택만</label></div>
                          <input type="text" placeholder="검색..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-64 bg-input-bg border-separator rounded-md px-2 py-1.5 text-sm"/>
@@ -142,11 +142,23 @@ const ProjectList = () => {
                 </div>
                 {viewMode === 'list' ? (
                     <div className="flex-grow overflow-auto">
-                        <table className="w-full text-sm text-left table-fixed">
-                            <thead className="sticky top-0 z-10 bg-table-header">
-                                <tr>
-                                    <th className="p-2 w-12 text-center bg-table-header"><input type="checkbox" onChange={handleSelectAll} checked={!loading && sortedAndFilteredProjects.length > 0 && selectedRows.size === sortedAndFilteredProjects.length} /></th>
-                                    {displayedColumns.map(key => (
+                        <table className="w-full text-sm text-left table-fixed border-separate border-spacing-0">
+                            <thead className="sticky top-0 z-20">
+                                <tr className="bg-table-header text-table-header-text uppercase">
+                                    <th className="p-2 w-12 text-center sticky left-0 z-30 bg-table-header"><input type="checkbox" onChange={handleSelectAll} checked={!loading && sortedAndFilteredProjects.length > 0 && selectedRows.size === sortedAndFilteredProjects.length} /></th>
+                                    {visibleFixedColumns.map((key, index) => {
+                                        let leftPosition = 48; // 체크박스 너비
+                                        if (index > 0) {
+                                            // 'status' 컬럼의 너비를 더함
+                                            leftPosition += parseInt(ALL_COLUMNS[FIXED_COLUMN_IDS[0]].width.replace('w-','')) * 4; // w-24 -> 96px
+                                        }
+                                        return (
+                                            <th key={key} className={`p-2 text-center whitespace-nowrap cursor-pointer sticky z-20 bg-table-header ${ALL_COLUMNS[key]?.width}`} style={{ left: `${leftPosition}px` }} onClick={() => ALL_COLUMNS[key].sortable && requestSort(key)}>
+                                                <div className="flex items-center justify-center">{ALL_COLUMNS[key].header}{ALL_COLUMNS[key].sortable && <ArrowUpDown size={12} className={`ml-1 ${sortConfig?.key === key ? 'text-accent' : 'text-gray-500'}`} />}</div>
+                                            </th>
+                                        );
+                                    })}
+                                    {visibleDraggableColumns.map(key => (
                                         <th key={key} className={`p-2 text-center whitespace-nowrap cursor-pointer bg-table-header ${ALL_COLUMNS[key]?.width || ''}`} onClick={() => ALL_COLUMNS[key].sortable && requestSort(key)}>
                                             <div className="flex items-center justify-center">{ALL_COLUMNS[key].header}{ALL_COLUMNS[key].sortable && <ArrowUpDown size={12} className={`ml-1 ${sortConfig?.key === key ? 'text-accent' : 'text-gray-500'}`} />}</div>
                                         </th>
@@ -156,12 +168,24 @@ const ProjectList = () => {
                             <tbody className="divide-y divide-separator">
                                 {sortedAndFilteredProjects.map(p => (
                                     <tr key={p.id} onDoubleClick={() => navigate(`/projects/${p.id}`)} className="hover:bg-tab-hover cursor-pointer group">
-                                        <td className="p-2 text-center"><input type="checkbox" checked={selectedRows.has(p.id)} onChange={() => handleSelectRow(p.id)} onClick={e => e.stopPropagation()} /></td>
-                                        {displayedColumns.map(key => (
+                                        <td className="p-2 text-center sticky left-0 z-10 bg-card-bg group-hover:bg-tab-hover"><input type="checkbox" checked={selectedRows.has(p.id)} onChange={() => handleSelectRow(p.id)} onClick={e => e.stopPropagation()} /></td>
+                                        {visibleFixedColumns.map((key, index) => {
+                                            let leftPosition = 48;
+                                            if (index > 0) {
+                                                leftPosition += parseInt(ALL_COLUMNS[FIXED_COLUMN_IDS[0]].width.replace('w-','')) * 4;
+                                            }
+                                            return (
+                                                <td key={key} className={`p-2 whitespace-nowrap text-center sticky z-10 bg-card-bg group-hover:bg-tab-hover`} style={{ left: `${leftPosition}px` }} title={p[key]}>
+                                                    <div className="truncate">
+                                                       {key === 'status' ? <StatusDisplay status={p.status} /> : p[key]}
+                                                    </div>
+                                                </td>
+                                            );
+                                        })}
+                                        {visibleDraggableColumns.map(key => (
                                             <td key={key} className={`p-2 whitespace-nowrap ${['contract_amount', 'balance', 'total_amount', 'billed_amount'].includes(key) ? 'text-right' : 'text-center'}`} title={p[key]}>
                                                 <div className="truncate">
-                                                    {key === 'status' ? <StatusDisplay status={p.status} /> :
-                                                     ['start_date', 'end_date', 'contract_date', 'completion_date'].includes(key) ? formatDate(p[key]) :
+                                                    {['start_date', 'end_date', 'contract_date', 'completion_date'].includes(key) ? formatDate(p[key]) :
                                                      ['contract_amount', 'balance', 'total_amount', 'billed_amount'].includes(key) ? formatCurrency(p[key]) :
                                                      p[key] || '-'}
                                                 </div>
@@ -173,7 +197,18 @@ const ProjectList = () => {
                         </table>
                     </div>
                 ) : (
-                    <div className="flex-grow overflow-auto p-4"><ProjectCard projects={sortedAndFilteredProjects} selectedRows={selectedRows} onSelectRow={handleSelectRow}/></div>
+                    <div className="flex-grow overflow-auto p-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+                            {sortedAndFilteredProjects.map(p => (
+                                <ProjectCard 
+                                    key={p.id} 
+                                    project={p} 
+                                    isSelected={selectedRows.has(p.id)} 
+                                    onSelect={handleSelectRow} 
+                                />
+                            ))}
+                        </div>
+                    </div>
                 )}
             </div>
         </div>
