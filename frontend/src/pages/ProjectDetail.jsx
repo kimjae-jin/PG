@@ -6,13 +6,49 @@ import FileUploadModal from '../components/FileUploadModal';
 
 // --- 하위 컴포넌트 정의 ---
 
-const InfoCard = ({ title, children, className = '' }) => (<div className={`bg-card-bg p-4 rounded-lg shadow-md ${className}`}><h3 className="text-xs text-text-muted font-semibold mb-2 uppercase">{title}</h3><div>{children}</div></div>);
-const TabButton = ({ label, name, activeTab, setActiveTab }) => (<button onClick={() => setActiveTab(name)} className={`py-3 px-4 text-sm font-semibold transition-colors duration-200 whitespace-nowrap ${activeTab === name ? 'border-b-2 border-accent text-text-color' : 'border-transparent text-text-muted hover:text-text-color hover:bg-tab-hover'}`}>{label}</button>);
-const FormInput = ({ label, name, value, onChange, type = 'text', as = 'input' }) => { const commonProps = { id: name, name: name, value: value || '', onChange: onChange, className: "mt-1 block w-full bg-input-bg border border-separator rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-accent focus:border-accent sm:text-sm" }; return (<div><label htmlFor={name} className="block text-sm font-medium text-text-muted">{label}</label>{as === 'textarea' ? <textarea {...commonProps} rows="4" /> : <input type={type} {...commonProps} />}</div>);};
+const InfoCard = ({ title, children, className = '' }) => (
+    <div className={`bg-card-bg p-4 rounded-lg shadow-md ${className}`}>
+        <h3 className="text-xs text-text-muted font-semibold mb-2 uppercase">{title}</h3>
+        <div>{children}</div>
+    </div>
+);
 
+const TabButton = ({ label, name, activeTab, setActiveTab }) => (
+    <button 
+        onClick={() => setActiveTab(name)} 
+        className={`py-3 px-4 text-sm font-semibold transition-colors duration-200 whitespace-nowrap ${activeTab === name ? 'border-b-2 border-accent text-text-color' : 'border-transparent text-text-muted hover:text-text-color hover:bg-tab-hover'}`}
+    >
+        {label}
+    </button>
+);
+
+const FormInput = ({ label, name, value, onChange, type = 'text', as = 'input' }) => {
+    const commonProps = {
+        id: name,
+        name: name,
+        value: value || '',
+        onChange: onChange,
+        className: "mt-1 block w-full bg-input-bg border border-separator rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-accent focus:border-accent sm:text-sm"
+    };
+    return (
+        <div>
+            <label htmlFor={name} className="block text-sm font-medium text-text-muted">{label}</label>
+            {as === 'textarea' ? <textarea {...commonProps} rows="4" /> : <input type={type} {...commonProps} />}
+        </div>
+    );
+};
+
+// [수정됨] 누락된 모든 필드를 복원한 DetailsTab 컴포넌트
 const DetailsTab = ({ projectId, revisions, onAddFileClick }) => {
-    const headers = ["적용일", "구분", "변경사항/사유", "작성일", "첨부파일 관리"];
-    const TableHeader = ({ headers }) => (<thead className="bg-table-header text-table-header-text uppercase text-xs sticky top-0 z-10"><tr>{headers.map(h => <th key={h} className="p-3 font-semibold text-left whitespace-nowrap">{h}</th>)}</tr></thead>);
+    const headers = ["적용일", "구분", "변경사항/사유", "계약일", "착수일", "완료일", "지분금액", "비고", "첨부파일"];
+    const TableHeader = ({ headers }) => (
+        <thead className="bg-table-header text-table-header-text uppercase text-xs sticky top-0 z-10">
+            <tr>
+                {headers.map(h => <th key={h} className="p-3 font-semibold text-left whitespace-nowrap">{h}</th>)}
+            </tr>
+        </thead>
+    );
+    
     return (
         <div className="h-full flex flex-col">
             <div className="flex-grow overflow-y-auto rounded-lg border border-separator">
@@ -23,9 +59,13 @@ const DetailsTab = ({ projectId, revisions, onAddFileClick }) => {
                             revisions.map(rev => (
                                 <tr key={rev.id}>
                                     <td className="p-3">{rev.status_change_date ? new Date(rev.status_change_date).toLocaleDateString('ko-KR') : '-'}</td>
-                                    <td className="p-3">{rev.revision_type}</td>
-                                    <td className="p-3 whitespace-pre-wrap">{rev.reason}</td>
-                                    <td className="p-3">{rev.createdAt ? new Date(rev.createdAt).toLocaleDateString('ko-KR') : '-'}</td>
+                                    <td className="p-3 font-semibold">{rev.revision_type}</td>
+                                    <td className="p-3 whitespace-pre-wrap min-w-[200px]">{rev.reason}</td>
+                                    <td className="p-3">{rev.contract_date ? new Date(rev.contract_date).toLocaleDateString('ko-KR') : '-'}</td>
+                                    <td className="p-3">{rev.start_date ? new Date(rev.start_date).toLocaleDateString('ko-KR') : '-'}</td>
+                                    <td className="p-3">{rev.end_date ? new Date(rev.end_date).toLocaleDateString('ko-KR') : '-'}</td>
+                                    <td className="p-3 text-right font-mono">{rev.total_equity_amount ? rev.total_equity_amount.toLocaleString() : '-'}</td>
+                                    <td className="p-3">{rev.remarks}</td>
                                     <td className="p-3">
                                         {rev.attachment_count > 0 ? (
                                             <button onClick={() => window.open(`/projects/${projectId}?tab=files`, '_self')} className="flex items-center text-accent text-xs hover:underline">
@@ -163,9 +203,6 @@ const FilesTab = ({ projectId }) => {
 };
 
 const NotesTab = ({ projectId }) => { const [notes, setNotes] = useState([]); const [isLoading, setIsLoading] = useState(true); useEffect(() => { setIsLoading(true); console.warn(`[안정화 모드] NotesTab: /api/projects/${projectId}/notes API 호출이 비활성화되었습니다.`); setNotes([]); setIsLoading(false); }, [projectId]); if (isLoading) return <p className="text-text-muted">특이사항 로딩 중...</p>; return ( <div className="space-y-6"> <div><h4 className="font-bold text-text-color mb-2">특이사항 수동 기록</h4><textarea rows="3" className="w-full p-2 bg-input-bg border border-separator rounded-md text-text-color" placeholder="기록할 내용을 입력하세요... (API 연결 필요)" disabled></textarea><button disabled className="mt-2 bg-accent text-white font-bold py-2 px-4 rounded disabled:opacity-50 disabled:cursor-not-allowed">기록 저장</button></div> <div><h4 className="font-bold text-text-color mb-2">전체 기록</h4><div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">{notes.length > 0 ? notes.map(note => (<div key={note.id} />)) : <p className="p-4 text-center text-text-muted">- 기록이 없습니다 -</p>}</div></div> </div> ); };
-
-
-// --- 메인 컴포넌트 ---
 const ProjectDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -217,28 +254,48 @@ const ProjectDetail = () => {
         fetchProjectData();
     }, [id, isNew]);
 
+    // [수정됨] 안정성과 즉각적인 UI 반응을 보장하는 저장 핸들러
     const handleSaveRevision = async (formData) => {
         try {
             const response = await fetch(`http://localhost:5001/api/projects/${id}/revisions`, { method: 'POST', body: formData });
-            if (!response.ok) { const errData = await response.json(); throw new Error(errData.error || '이력 저장에 실패했습니다.'); }
-            await fetchProjectData();
+            if (!response.ok) { 
+                const errData = await response.json(); 
+                throw new Error(errData.details || errData.error || '이력 저장에 실패했습니다.'); 
+            }
+            // 백엔드가 반환한 새 이력 객체를 직접 상태에 추가
+            const newRevision = await response.json();
+            setRevisions(prevRevisions => [newRevision, ...prevRevisions]);
+            
+            // 프로젝트 상태도 최신으로 갱신
+            fetch(`http://localhost:5001/api/projects/${id}`).then(res => res.json()).then(data => setProject(data));
+
             setIsAddRevisionModalOpen(false);
             alert('이력이 성공적으로 추가되었습니다.');
-        } catch (err) { alert(`오류: ${err.message}`); }
+        } catch (err) { 
+            alert(`오류: ${err.message}`); 
+        }
     };
 
     const handleOpenUploadModal = (revisionId) => { setSelectedRevisionId(revisionId); setIsFileUploadModalOpen(true); };
 
+    // [수정됨] 파일 업로드 후 이력 목록의 첨부파일 개수도 갱신
     const handleFileUpload = async (revisionId, file) => {
         const formData = new FormData();
         formData.append('attachment', file);
         try {
             const response = await fetch(`http://localhost:5001/api/revisions/${revisionId}/attachments`, { method: 'POST', body: formData });
             if (!response.ok) throw new Error('파일 업로드에 실패했습니다.');
-            await fetchProjectData();
+            
+            // 특정 이력의 attachment_count만 갱신
+            setRevisions(prevRevisions => prevRevisions.map(rev => 
+                rev.id === revisionId ? { ...rev, attachment_count: rev.attachment_count + 1 } : rev
+            ));
+
             setIsFileUploadModalOpen(false);
             alert('파일이 성공적으로 첨부되었습니다.');
-        } catch (err) { alert(`오류: ${err.message}`); }
+        } catch (err) { 
+            alert(`오류: ${err.message}`); 
+        }
     };
 
     const handleChange = (e) => setProject(prev => ({ ...prev, [e.target.name]: e.target.value }));
