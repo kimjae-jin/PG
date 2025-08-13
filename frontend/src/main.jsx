@@ -9,8 +9,14 @@ import ProjectList from './pages/ProjectList.jsx';
 import ProjectDetail from './pages/ProjectDetail.jsx';
 import PlaceholderPage from './pages/PlaceholderPage.jsx';
 import ThemePage from './pages/ThemePage.jsx';
-import BillingPage from './pages/BillingPage.jsx';
-import CompaniesPage from './pages/CompaniesPage.jsx'; // [오타 수정 완료]
+
+import BillingList from './pages/BillingList.jsx';
+import CompanyList from './pages/CompanyList.jsx';
+import TechnicianList from './pages/TechnicianList.jsx';
+
+// [신규 추가] 상세 페이지 컴포넌트를 import 합니다.
+import TechnicianDetail from './pages/TechnicianDetail.jsx';
+import CompanyDetail from './pages/CompanyDetail.jsx';
 
 import './App.css';
 
@@ -24,14 +30,18 @@ root.render(
           <Route path="/" element={<App />}>
             <Route index element={<HomePage />} />
 
-            {/* 프로젝트 관련 경로는 'projects'로 통일 */}
             <Route path="projects" element={<ProjectList />} />
             <Route path="projects/new" element={<ProjectDetail />} />
             <Route path="projects/:id" element={<ProjectDetail />} />
 
-            <Route path="technicians" element={<PlaceholderPage title="기술인" />} />
-            <Route path="companies" element={<CompaniesPage />} />
-            <Route path="billing" element={<BillingPage />} />
+            <Route path="technicians" element={<TechnicianList />} />
+            <Route path="technicians/:id" element={<TechnicianDetail />} />
+
+            <Route path="companies" element={<CompanyList />} />
+            <Route path="companies/:id" element={<CompanyDetail />} />
+            
+            <Route path="billing" element={<BillingList />} />
+            
             <Route path="evaluation" element={<PlaceholderPage title="사업수행능력평가" />} />
             <Route path="analysis" element={<PlaceholderPage title="입찰분석" />} />
             <Route path="docs" element={<PlaceholderPage title="문서/서식" />} />
