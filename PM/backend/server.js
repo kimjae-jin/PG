@@ -2,150 +2,36 @@ const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const cors = require('cors');
 const path = require('path');
-
 const app = express();
 const PORT = process.env.PORT || 4000;
 const DB_FILE = path.join(__dirname, 'database.db');
-
 app.use(cors());
 app.use(express.json());
-
-const db = new sqlite3.Database(DB_FILE, (err) => {
-    if (err) {
-        console.error(`[ERROR] 데이터베이스 연결 실패: ${DB_FILE}`, err.message);
-        process.exit(1);
-    }
-    console.log(`[SUCCESS] SQLite 데이터베이스에 성공적으로 연결되었습니다: ${DB_FILE}`);
-});
-
-const handleDbError = (err, res) => {
-    console.error('DB Error:', err.message);
-    res.status(500).json({ error: '서버 내부 오류가 발생했습니다.', details: err.message });
-};
-
-// --- Technicians Module ---
-app.get('/api/technicians', (req, res) => {
-    db.all("SELECT * FROM Technicians ORDER BY name", [], (err, rows) => {
-        if (err) return handleDbError(err, res);
-        res.json(rows);
-    });
-});
-
-app.get('/api/technicians/:id', (req, res) => {
-    const { id } = req.params;
-    db.get("SELECT * FROM Technicians WHERE technician_id = ?", [id], (err, row) => {
-        if (err) return handleDbError(err, res);
-        if (!row) return res.status(404).json({ error: '해당 ID의 기술인력을 찾을 수 없습니다.' });
-        res.json(row);
-    });
-});
-
-app.post('/api/technicians', (req, res) => {
-    const { name, email } = req.body;
-    const sql = `INSERT INTO Technicians (name, email) VALUES (?, ?)`;
-    db.run(sql, [name, email], function(err) {
-        if (err) return handleDbError(err, res);
-        res.status(201).json({ technician_id: this.lastID });
-    });
-});
-
-app.get('/api/technicians/:id/career', (req, res) => {
-    const { id } = req.params;
-    const sql = `SELECT c.*, p.project_name FROM CareerRecords c
-                 JOIN Projects p ON c.project_id = p.project_id
-                 WHERE c.technician_id = ? ORDER BY c.participation_start_date DESC`;
-    db.all(sql, [id], (err, rows) => {
-        if (err) return handleDbError(err, res);
-        res.json(rows);
-    });
-});
-
-app.post('/api/technicians/:id/career', (req, res) => {
-    const { id: technician_id } = req.params;
-    const { project_id, participation_field, assigned_task, role, participation_start_date, participation_end_date } = req.body;
-    const sql = `INSERT INTO CareerRecords (technician_id, project_id, participation_field, assigned_task, role, participation_start_date, participation_end_date)
-                 VALUES (?, ?, ?, ?, ?, ?, ?)`;
-    db.run(sql, [technician_id, project_id, participation_field, assigned_task, role, participation_start_date, participation_end_date], function(err) {
-        if (err) return handleDbError(err, res);
-        res.status(201).json({ career_id: this.lastID });
-    });
-});
-
-// --- Projects & Contracts Module ---
-app.get('/api/projects', (req, res) => {
-    db.all("SELECT * FROM Projects ORDER BY start_date DESC", [], (err, rows) => {
-        if (err) return handleDbError(err, res);
-        res.json(rows);
-    });
-});
-
-app.get('/api/contracts/:id', async (req, res) => {
-    const { id } = req.params;
-    const contractSql = "SELECT * FROM Contracts WHERE contract_id = ?";
-    const financialsSql = "SELECT SUM(amount) as total_paid FROM Financials WHERE contract_id = ? AND transaction_type = 'PAYMENT'";
-    const revisionsSql = "SELECT SUM(revised_amount) as total_revision FROM ContractRevisions WHERE contract_id = ?";
-    try {
-        const contract = await new Promise((resolve, reject) => db.get(contractSql, [id], (err, row) => err ? reject(err) : resolve(row)));
-        if (!contract) return res.status(404).json({ error: '해당 ID의 계약을 찾을 수 없습니다.' });
-        const payment = await new Promise((resolve, reject) => db.get(financialsSql, [id], (err, row) => err ? reject(err) : resolve(row)));
-        const revision = await new Promise((resolve, reject) => db.get(revisionsSql, [id], (err, row) => err ? reject(err) : resolve(row)));
-        const totalPaid = payment?.total_paid || 0;
-        const totalRevisionAmount = revision?.total_revision || 0;
-        const finalContractAmount = contract.contract_amount + totalRevisionAmount;
-        const finalBalance = finalContractAmount - totalPaid;
-        res.json({ ...contract, final_contract_amount: finalContractAmount, total_paid: totalPaid, balance: finalBalance });
-    } catch (err) { handleDbError(err, res); }
-});
-
-app.get('/api/contracts/:id/revisions', (req, res) => {
-    const { id } = req.params;
-    db.all("SELECT * FROM ContractRevisions WHERE contract_id = ? ORDER BY revision_date DESC", [id], (err, rows) => {
-        if (err) return handleDbError(err, res);
-        res.json(rows);
-    });
-});
-
-app.post('/api/contracts/:id/revisions', (req, res) => {
-    const { id: contract_id } = req.params;
-    const { revision_date, revised_amount, reason, description } = req.body;
-    const sql = `INSERT INTO ContractRevisions (contract_id, revision_date, revised_amount, reason, description) VALUES (?, ?, ?, ?, ?)`;
-    db.run(sql, [contract_id, revision_date, revised_amount, reason, description], function(err) {
-        if (err) return handleDbError(err, res);
-        res.status(201).json({ revision_id: this.lastID });
-    });
-});
-
-// --- Bidding & PQ Module ---
-app.post('/api/bids/calculate-pq', async (req, res) => {
-    const { business_type, technician_ids } = req.body;
-    if (!business_type || !technician_ids || !Array.isArray(technician_ids) || technician_ids.length === 0) {
-        return res.status(400).json({ error: '사업유형과 최소 1명 이상의 기술인 ID 목록이 필요합니다.' });
-    }
-    try {
-        let totalScore = 0;
-        const placeholders = technician_ids.map(() => '?').join(',');
-        const technicians = await new Promise((res, rej) => db.all(`SELECT * FROM Technicians WHERE technician_id IN (${placeholders})`, technician_ids, (e,r) => e ? rej(e) : res(r)));
-        for (const tech of technicians) { totalScore += 10; } // Simplified scoring logic
-        if (business_type === 'IT') totalScore *= 1.1;
-        res.json({ estimated_pq_score: totalScore.toFixed(2) });
-    } catch (err) { handleDbError(err, res); }
-});
-
-// --- Quotation Module ---
-app.post('/api/contracts/from-quotation/:id', (req, res) => {
-    const { id: quotation_id } = req.params;
-    // Logic to create contract from quotation
-    res.status(201).json({ message: "견적으로부터 계약이 성공적으로 생성되었습니다."});
-});
-
-// --- Document Module ---
-app.get('/api/documents/next-number', (req, res) => {
-    const { type } = req.query;
-    const year = new Date().getFullYear();
-    const prefix = type ? type.toUpperCase() : 'DOC';
-    res.json({ next_document_number: `${prefix}-${year}-0001` });
-});
-
-app.listen(PORT, () => {
-    console.log(`[INFO] 서버가 http://localhost:${PORT} 에서 실행 중입니다.`);
-});
+const db = new sqlite3.Database(DB_FILE, (err) => { if (err) { console.error(`[FATAL] 데이터베이스 연결 실패: ${DB_FILE}`, err.message); process.exit(1); } console.log(`[INFO] SQLite 데이터베이스에 성공적으로 연결되었습니다: ${DB_FILE}`); });
+const DBP = { run: (sql, params = []) => new Promise((resolve, reject) => { db.run(sql, params, function (err) { if (err) return reject(err); resolve(this); }); }), get: (sql, params = []) => new Promise((resolve, reject) => { db.get(sql, params, (err, row) => { if (err) return reject(err); resolve(row); }); }), all: (sql, params = []) => new Promise((resolve, reject) => { db.all(sql, params, (err, rows) => { if (err) return reject(err); resolve(rows); }); }), };
+const handleApiError = (err, res, context = 'API') => { console.error(`[ERROR] ${context}:`, err.message); res.status(500).json({ error: '서버 내부 오류가 발생했습니다.', details: err.message }); };
+app.get('/api/technicians', async (req, res) => { try { const technicians = await DBP.all("SELECT technician_id, name, email, hire_date, employment_status FROM Technicians ORDER BY hire_date DESC"); res.json(technicians); } catch (err) { handleApiError(err, res, 'Get All Technicians'); } });
+app.get('/api/technicians/:id', async (req, res) => { try { const { id } = req.params; const technician = await DBP.get("SELECT * FROM Technicians WHERE technician_id = ?", [id]); if (!technician) return res.status(404).json({ error: '해당 ID의 기술인을 찾을 수 없습니다.' }); res.json(technician); } catch (err) { handleApiError(err, res, 'Get Technician by ID'); } });
+app.get('/api/technicians/:id/career', async (req, res) => { try { const { id } = req.params; const careerHistory = await DBP.all(`SELECT cr.*, p.project_name FROM CareerRecords cr JOIN Projects p ON cr.project_id = p.project_id WHERE cr.technician_id = ? ORDER BY cr.participation_start_date DESC`, [id]); res.json(careerHistory); } catch (err) { handleApiError(err, res, 'Get Technician Career'); } });
+app.get('/api/technicians/:techId/qualifications', async (req, res) => { try { const { techId } = req.params; const items = await DBP.all("SELECT * FROM Qualifications WHERE technician_id = ? ORDER BY issue_date DESC", [techId]); res.json(items); } catch (err) { handleApiError(err, res, 'Get Qualifications'); } });
+app.post('/api/technicians/:techId/qualifications', async (req, res) => { try { const { techId } = req.params; const { qualification_name, qualification_number, issuer, issue_date, expiry_date } = req.body; const result = await DBP.run(`INSERT INTO Qualifications (technician_id, qualification_name, qualification_number, issuer, issue_date, expiry_date) VALUES (?, ?, ?, ?, ?, ?)`, [techId, qualification_name, qualification_number, issuer, issue_date, expiry_date]); res.status(201).json({ qualification_id: result.lastID }); } catch (err) { handleApiError(err, res, 'Create Qualification'); } });
+app.put('/api/technicians/:techId/qualifications/:qualId', async (req, res) => { try { const { qualId } = req.params; const { qualification_name, qualification_number, issuer, issue_date, expiry_date } = req.body; const result = await DBP.run(`UPDATE Qualifications SET qualification_name = ?, qualification_number = ?, issuer = ?, issue_date = ?, expiry_date = ? WHERE qualification_id = ?`, [qualification_name, qualification_number, issuer, issue_date, expiry_date, qualId]); if (result.changes === 0) return res.status(404).json({ error: '해당 자격증을 찾을 수 없습니다.' }); res.json({ message: '자격증 정보가 성공적으로 수정되었습니다.' }); } catch (err) { handleApiError(err, res, 'Update Qualification'); } });
+app.delete('/api/technicians/:techId/qualifications/:qualId', async (req, res) => { try { const { qualId } = req.params; const result = await DBP.run(`DELETE FROM Qualifications WHERE qualification_id = ?`, [qualId]); if (result.changes === 0) return res.status(404).json({ error: '해당 자격증을 찾을 수 없습니다.' }); res.status(204).send(); } catch (err) { handleApiError(err, res, 'Delete Qualification'); } });
+app.get('/api/technicians/:techId/trainings', async (req, res) => { try { const { techId } = req.params; const items = await DBP.all("SELECT * FROM Trainings WHERE technician_id = ? ORDER BY start_date DESC", [techId]); res.json(items); } catch (err) { handleApiError(err, res, 'Get Trainings'); } });
+app.post('/api/technicians/:techId/trainings', async (req, res) => { try { const { techId } = req.params; const { training_name, institution, start_date, end_date, completion_status } = req.body; const result = await DBP.run(`INSERT INTO Trainings (technician_id, training_name, institution, start_date, end_date, completion_status) VALUES (?, ?, ?, ?, ?, ?)`, [techId, training_name, institution, start_date, end_date, completion_status]); res.status(201).json({ training_id: result.lastID }); } catch (err) { handleApiError(err, res, 'Create Training'); } });
+app.put('/api/technicians/:techId/trainings/:trainId', async (req, res) => { try { const { trainId } = req.params; const { training_name, institution, start_date, end_date, completion_status } = req.body; const result = await DBP.run(`UPDATE Trainings SET training_name = ?, institution = ?, start_date = ?, end_date = ?, completion_status = ? WHERE training_id = ?`, [training_name, institution, start_date, end_date, completion_status, trainId]); if (result.changes === 0) return res.status(404).json({ error: '해당 교육 이력을 찾을 수 없습니다.' }); res.json({ message: '교육 이력 정보가 성공적으로 수정되었습니다.' }); } catch (err) { handleApiError(err, res, 'Update Training'); } });
+app.delete('/api/technicians/:techId/trainings/:trainId', async (req, res) => { try { const { trainId } = req.params; const result = await DBP.run(`DELETE FROM Trainings WHERE training_id = ?`, [trainId]); if (result.changes === 0) return res.status(404).json({ error: '해당 교육 이력을 찾을 수 없습니다.' }); res.status(204).send(); } catch (err) { handleApiError(err, res, 'Delete Training'); } });
+app.get('/api/contracts/:contractId/financials', async (req, res) => { try { const { contractId } = req.params; const financials = await DBP.all("SELECT * FROM Financials WHERE contract_id = ? ORDER BY transaction_date DESC", [contractId]); res.json(financials); } catch (err) { handleApiError(err, res, 'Get Financials'); } });
+app.post('/api/contracts/:contractId/financials', async (req, res) => { try { const { contractId } = req.params; const { transaction_type, transaction_date, amount, description, due_date } = req.body; const result = await DBP.run(`INSERT INTO Financials (contract_id, transaction_type, transaction_date, amount, description, due_date) VALUES (?, ?, ?, ?, ?, ?)`, [contractId, transaction_type, transaction_date, amount, description, due_date]); res.status(201).json({ financial_id: result.lastID }); } catch (err) { handleApiError(err, res, 'Create Financial'); } });
+app.put('/api/contracts/:contractId/financials/:financialId', async (req, res) => { try { const { financialId } = req.params; const { transaction_type, transaction_date, amount, description, due_date } = req.body; const result = await DBP.run(`UPDATE Financials SET transaction_type = ?, transaction_date = ?, amount = ?, description = ?, due_date = ? WHERE financial_id = ?`, [transaction_type, transaction_date, amount, description, due_date, financialId]); if (result.changes === 0) return res.status(404).json({ error: '해당 재무 정보를 찾을 수 없습니다.' }); res.json({ message: '재무 정보가 성공적으로 수정되었습니다.' }); } catch (err) { handleApiError(err, res, 'Update Financial'); } });
+app.delete('/api/contracts/:contractId/financials/:financialId', async (req, res) => { try { const { financialId } = req.params; const result = await DBP.run(`DELETE FROM Financials WHERE financial_id = ?`, [financialId]); if (result.changes === 0) return res.status(404).json({ error: '해당 재무 정보를 찾을 수 없습니다.' }); res.status(204).send(); } catch (err) { handleApiError(err, res, 'Delete Financial'); } });
+app.get('/api/contracts/:contractId/revisions', async (req, res) => { try { const { contractId } = req.params; const revisions = await DBP.all("SELECT * FROM ContractRevisions WHERE contract_id = ? ORDER BY revision_date DESC", [contractId]); res.json(revisions); } catch (err) { handleApiError(err, res, 'Get Revisions'); } });
+app.post('/api/contracts/:contractId/revisions', async (req, res) => { try { const { contractId } = req.params; const { revision_date, revised_amount, reason, description } = req.body; const result = await DBP.run(`INSERT INTO ContractRevisions (contract_id, revision_date, revised_amount, reason, description) VALUES (?, ?, ?, ?, ?)`, [contractId, revision_date, revised_amount, reason, description]); res.status(201).json({ revision_id: result.lastID }); } catch (err) { handleApiError(err, res, 'Create Revision'); } });
+app.put('/api/contracts/:contractId/revisions/:revisionId', async (req, res) => { try { const { revisionId } = req.params; const { revision_date, revised_amount, reason, description } = req.body; const result = await DBP.run(`UPDATE ContractRevisions SET revision_date = ?, revised_amount = ?, reason = ?, description = ? WHERE revision_id = ?`, [revision_date, revised_amount, reason, description, revisionId]); if (result.changes === 0) return res.status(404).json({ error: '해당 변경 이력을 찾을 수 없습니다.' }); res.json({ message: '변경 이력이 성공적으로 수정되었습니다.' }); } catch (err) { handleApiError(err, res, 'Update Revision'); } });
+app.delete('/api/contracts/:contractId/revisions/:revisionId', async (req, res) => { try { const { revisionId } = req.params; const result = await DBP.run(`DELETE FROM ContractRevisions WHERE revision_id = ?`, [revisionId]); if (result.changes === 0) return res.status(404).json({ error: '해당 변경 이력을 찾을 수 없습니다.' }); res.status(204).send(); } catch (err) { handleApiError(err, res, 'Delete Revision'); } });
+app.get('/api/quotations/:id', async (req, res) => { try { const { id } = req.params; const quotation = await DBP.get(`SELECT q.*, c.company_name FROM Quotations q LEFT JOIN Companies c ON q.client_company_id = c.company_id WHERE q.quotation_id = ?`, [id]); if (!quotation) return res.status(404).json({ error: '해당 ID의 견적서를 찾을 수 없습니다.' }); quotation.client_company = { name: quotation.company_name }; delete quotation.company_name; res.json(quotation); } catch (err) { handleApiError(err, res, 'Get Quotation by ID'); } });
+app.post('/api/bids/calculate-pq', async (req, res) => { const { technician_ids } = req.body; if (!technician_ids || !Array.isArray(technician_ids) || technician_ids.length === 0) { return res.status(400).json({ error: '최소 1명 이상의 기술인 ID 목록(technician_ids)이 필요합니다.' }); } try { const placeholders = technician_ids.map(() => '?').join(','); const [technicians, qualifications, careers] = await Promise.all([ DBP.all(`SELECT technician_id, name, hire_date FROM Technicians WHERE technician_id IN (${placeholders})`, technician_ids), DBP.all(`SELECT technician_id, COUNT(*) as count FROM Qualifications WHERE technician_id IN (${placeholders}) GROUP BY technician_id`, technician_ids), DBP.all(`SELECT technician_id, COUNT(*) as count FROM CareerRecords WHERE technician_id IN (${placeholders}) GROUP BY technician_id`, technician_ids) ]); const qualificationsMap = new Map(qualifications.map(q => [q.technician_id, q.count])); const careersMap = new Map(careers.map(c => [c.technician_id, c.count])); let totalScore = 0; const technicianDetails = technicians.map(tech => { let techScore = 0; const yearsOfService = tech.hire_date ? (new Date() - new Date(tech.hire_date)) / (1000 * 60 * 60 * 24 * 365.25) : 0; techScore += Math.min(yearsOfService * 1.5, 10); const qualificationCount = qualificationsMap.get(tech.technician_id) || 0; techScore += Math.min(qualificationCount * 2.0, 10); const careerCount = careersMap.get(tech.technician_id) || 0; techScore += Math.min(careerCount * 1.0, 15); totalScore += techScore; return { technician_id: tech.technician_id, name: tech.name, score: parseFloat(techScore.toFixed(2)) }; }); res.json({ total_pq_score: parseFloat(totalScore.toFixed(2)), participant_count: technicians.length, technician_details: technicianDetails }); } catch (err) { handleApiError(err, res, 'Calculate PQ Score'); } });
+app.post('/api/contracts/from-quotation/:id', async (req, res) => { const { id: quotation_id } = req.params; try { const quotation = await DBP.get("SELECT * FROM Quotations WHERE quotation_id = ? AND status = 'ACCEPTED'", [quotation_id]); if (!quotation) { return res.status(404).json({ error: "계약 생성을 위해서는 '승인(ACCEPTED)' 상태의 견적서가 필요합니다." }); } await DBP.run("BEGIN TRANSACTION"); const projectResult = await DBP.run(`INSERT INTO Projects (project_name, client_company_id, project_status) VALUES (?, ?, 'ONGOING')`, [`[계약] ${quotation.quotation_number} 연계`, quotation.client_company_id]); const newProjectId = projectResult.lastID; const contractResult = await DBP.run(`INSERT INTO Contracts (project_id, quotation_id, contract_date, contract_amount, status) VALUES (?, ?, date('now'), ?, 'ACTIVE')`, [newProjectId, quotation_id, quotation.total_amount]); const newContractId = contractResult.lastID; await DBP.run("COMMIT"); res.status(201).json({ message: "견적으로부터 프로젝트 및 계약이 성공적으로 생성되었습니다.", new_contract_id: newContractId }); } catch (err) { await DBP.run("ROLLBACK"); handleApiError(err, res, 'Create Contract from Quotation'); } });
+app.get('/api/documents/next-number', async (req, res) => { const { type } = req.query; if (!type) { return res.status(400).json({ error: "문서 종류를 지정하는 'type' 쿼리 파라미터가 필요합니다." }); } try { const year = new Date().getFullYear(); const prefix = `${type.toUpperCase()}-${year}-`; const lastNumberRecord = await DBP.get("SELECT document_name FROM Documents WHERE document_name LIKE ? ORDER BY document_name DESC LIMIT 1", [`${prefix}%`]); let nextSeq = 1; if (lastNumberRecord && lastNumberRecord.document_name) { const lastNum = parseInt(lastNumberRecord.document_name.split('-').pop(), 10); if (!isNaN(lastNum)) { nextSeq = lastNum + 1; } } const nextNumber = `${prefix}${String(nextSeq).padStart(4, '0')}`; res.json({ next_document_number: nextNumber }); } catch (err) { handleApiError(err, res, 'Get Next Document Number'); } });
+app.listen(PORT, () => { console.log(`[SUCCESS] 서버가 http://localhost:${PORT} 에서 성공적으로 실행되었습니다.`); });
+process.on('SIGINT', () => { console.log('\n[INFO] 서버 종료 요청을 받았습니다. 데이터베이스 연결을 닫습니다.'); db.close((err) => { if (err) console.error('[ERROR] 데이터베이스 연결 종료 중 오류 발생:', err.message); else console.log('[SUCCESS] 데이터베이스 연결이 성공적으로 종료되었습니다.'); process.exit(0); }); });

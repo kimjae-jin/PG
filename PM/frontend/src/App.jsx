@@ -1,54 +1,48 @@
 import React from 'react';
-import { Routes, Route, Link, Outlet, Navigate } from 'react-router-dom';
-
-// --- 페이지 컴포넌트 임포트 ---
+import { Routes, Route, NavLink, Outlet } from 'react-router-dom';
+import { Users, FileText, Briefcase, Building, Gavel, FileSignature } from 'lucide-react';
 import TechnicianList from './pages/TechnicianList';
 import TechnicianDetail from './pages/TechnicianDetail';
-// --- 이하 모든 페이지 컴포넌트들을 여기에 임포트해야 합니다 ---
-const Dashboard = () => <h1 className="text-white text-2xl">대시보드</h1>;
-const BidForm = () => <h1 className="text-white text-2xl">입찰/PQ 관리</h1>;
-const ContractDetail = () => <h1 className="text-white text-2xl">계약 상세</h1>;
-const CompanyInfo = () => <h1 className="text-white text-2xl">회사 정보</h1>;
-const FormsPage = () => <h1 className="text-white text-2xl">문서 관리</h1>;
-
-
+import BidForm from './pages/BidForm';
+import ContractDetail from './pages/ContractDetail';
+import QuotationDetail from './pages/QuotationDetail';
+import FormsPage from './pages/FormsPage';
+import CompanyInfo from './pages/CompanyInfo';
+const TechnicianNew = () => <div className="p-8"><h1 className="text-2xl font-bold">신규 기술인력 등록</h1></div>;
 const Layout = () => (
-    <div style={{ display: 'flex', height: '100vh', backgroundColor: '#111827', color: '#E5E7EB' }}>
-        <aside style={{ width: '250px', borderRight: '1px solid #374151', padding: '1rem', backgroundColor: '#1F2937' }}>
-            <h2 className="text-2xl font-bold mb-6 text-white">Project Genesis</h2>
-            <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                <Link to="/dashboard" className="p-2 rounded hover:bg-gray-700">대시보드</Link>
-                <Link to="/technicians" className="p-2 rounded hover:bg-gray-700">기술인력 관리</Link>
-                <Link to="/bids" className="p-2 rounded hover:bg-gray-700">입찰/PQ 관리</Link>
-                <Link to="/contracts/1" className="p-2 rounded hover:bg-gray-700">계약 상세 (샘플)</Link>
-                <Link to="/company" className="p-2 rounded hover:bg-gray-700">회사 정보</Link>
-                <Link to="/forms" className="p-2 rounded hover:bg-gray-700">문서 자동화</Link>
+    <div className="flex h-screen bg-gray-100 font-sans">
+        <aside className="w-64 bg-gray-800 text-white flex flex-col print:hidden">
+            <div className="h-16 flex items-center justify-center text-xl font-bold border-b border-gray-700">Project Genesis</div>
+            <nav className="flex-1 px-2 py-4 space-y-2">
+                <NavItem to="/technicians" icon={<Users size={20} />} label="기술인력 관리" />
+                <NavItem to="/bids/new" icon={<Gavel size={20} />} label="PQ 시뮬레이션" />
+                <NavItem to="/forms" icon={<FileSignature size={20} />} label="문서 생성" />
+                <NavItem to="/company" icon={<Building size={20} />} label="회사/면허 정보" />
+                <p className="px-4 pt-4 text-xs font-semibold text-gray-400 uppercase">예시 링크</p>
+                <NavItem to="/contracts/1" icon={<Briefcase size={20} />} label="계약 상세 (ID:1)" />
+                <NavItem to="/quotations/1" icon={<FileText size={20} />} label="견적 상세 (ID:1)" />
             </nav>
         </aside>
-        <main style={{ flex: 1, padding: '2rem', overflowY: 'auto' }}>
-            <Outlet />
-        </main>
+        <main className="flex-1 overflow-y-auto"><Outlet /></main>
     </div>
 );
-
+const NavItem = ({ to, icon, label }) => ( <NavLink to={to} end className={({ isActive }) => `flex items-center px-4 py-2.5 text-sm font-medium rounded-md transition-colors duration-200 ${ isActive ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }`} > {icon} <span className="ml-3">{label}</span> </NavLink> );
 function App() {
     return (
         <Routes>
-            {/* 기본 경로(/)로 접속 시 /dashboard로 자동 이동시킵니다. */}
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-
             <Route path="/" element={<Layout />}>
-                {/* /dashboard 경로를 명시적으로 정의합니다. */}
-                <Route path="dashboard" element={<Dashboard />} />
+                <Route index element={<TechnicianList />} />
                 <Route path="technicians" element={<TechnicianList />} />
+                <Route path="technicians/new" element={<TechnicianNew />} />
                 <Route path="technicians/:id" element={<TechnicianDetail />} />
-                <Route path="bids" element={<BidForm />} />
+                <Route path="bids/new" element={<BidForm />} />
                 <Route path="contracts/:id" element={<ContractDetail />} />
-                <Route path="company" element={<CompanyInfo />} />
+                <Route path="quotations/:id" element={<QuotationDetail />} />
                 <Route path="forms" element={<FormsPage />} />
+                <Route path="company" element={<CompanyInfo />} />
+                <Route path="*" element={<div className="p-8 text-center"><h1 className="text-2xl font-bold">404 - 페이지를 찾을 수 없습니다.</h1></div>} />
             </Route>
         </Routes>
     );
 }
-
 export default App;
