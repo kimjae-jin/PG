@@ -1,0 +1,16 @@
+/* frontend/src/index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* [신규] 모든 목록 테이블에 적용될 세로 구분선 스타일 */
+@layer components {
+  .table-container table th,
+  .table-container table td {
+    @apply border-r border-separator;
+  }
+  .table-container table th:last-child,
+  .table-container table td:last-child {
+    @apply border-r-0;
+  }
+}

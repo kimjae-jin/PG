@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>사용인감계</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic&display=swap');
+        body {
+            width: 210mm;
+            height: 297mm;
+            margin: 0;
+            padding: 25mm;
+            box-sizing: border-box;
+            font-family: 'Nanum Gothic', sans-serif;
+            font-size: 12pt;
+            line-height: 1.8;
+            word-break: break-all;
+        }
+        .container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .title {
+            text-align: center;
+            font-size: 24pt;
+            font-weight: bold;
+            letter-spacing: 1em;
+            margin-bottom: 50px;
+        }
+        .info-box {
+            border: 1px solid black;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+        .info-box .seal-label {
+            font-weight: bold;
+            font-size: 14pt;
+        }
+        .info-box .seal-image {
+            width: 60px;
+            height: 60px;
+            border: 1px solid #ccc;
+            margin: 0 20px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        .info-box .company-info {
+            flex-grow: 1;
+        }
+        .info-box .info-line {
+            display: flex;
+            margin-bottom: 5px;
+        }
+        .info-box .info-label {
+            width: 80px;
+            font-weight: bold;
+        }
+        .content {
+            flex-grow: 1;
+        }
+        .project-name {
+            margin-top: 20px;
+        }
+        .project-name .info-label {
+            font-weight: bold;
+        }
+        .footer {
+            margin-top: auto;
+        }
+        .date {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 13pt;
+        }
+        .signature-box {
+            text-align: right;
+            position: relative;
+        }
+        .signature-box .company-info {
+            display: inline-block;
+            text-align: left;
+            margin-right: 80px;
+        }
+        .signature-box .seal-stamp {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            width: 70px;
+            height: 70px;
+            color: transparent;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        .recipient {
+            font-weight: bold;
+            font-size: 14pt;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">사 용 인 감 계</h1>
+
+        <div class="info-box">
+            <span class="seal-label">사 용 인 감</span>
+            <div class="seal-image" style="background-image: url('{{myCompanyUsageSealUrl}}');"></div>
+            <div class="company-info">
+                <div class="info-line">
+                    <span class="info-label">주      소:</span>
+                    <span>{{myCompanyAddress}}</span>
+                </div>
+                <div class="info-line">
+                    <span class="info-label">상      호:</span>
+                    <span>{{myCompanyName}}</span>
+                </div>
+                <div class="info-line">
+                    <span class="info-label">성      명:</span>
+                    <span>{{myCompanyCeoName}}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <p>
+                위 인감은 본 사가 사용하는 인감으로써 귀 청에서 집행하는 아래 건의
+                등록계약 수금에 사용하겠으며 위 인감 사용으로 인한 법률상의 모든 책임은
+                본사가 질 것을 확약하고 이에 사용인감계를 제출합니다.
+            </p>
+            <p class="project-name">
+                <span class="info-label">건    명 :</span>
+                <span>{{projectName}}</span>
+            </p>
+        </div>
+
+        <div class="footer">
+            <div class="date">
+                {{currentYear}}년    {{currentMonth}}월    {{currentDay}}일
+            </div>
+            <div class="signature-box">
+                <div class="company-info">
+                    <div class="info-line">
+                        <span class="info-label">주       소 :</span>
+                        <span>{{myCompanyAddress}}</span>
+                    </div>
+                    <div class="info-line">
+                        <span class="info-label">상       호 :</span>
+                        <span>{{myCompanyName}}</span>
+                    </div>
+                    <div class="info-line">
+                        <span class="info-label">성명(대표자) :</span>
+                        <span>{{myCompanyName}}</span>
+                    </div>
+                </div>
+                <div class="seal-stamp" style="background-image: url('{{myCompanySealUrl}}');">
+                    (인)
+                </div>
+            </div>
+            <div class="recipient">
+                제주특별자치도 제주시 재무관 귀하
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,18 @@
+{
+  "name": "bidding-management-system-backend",
+  "version": "1.0.0",
+  "description": "Backend server for the Full-stack Bidding Management System.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "setup-db": "node database_setup.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Neo",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "sqlite3": "^5.1.7"
+  }
+}

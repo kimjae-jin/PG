@@ -1,0 +1,27 @@
+{
+  "name": "pg-backend",
+  "version": "6.0.0",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "db:setup": "node setup_database.js",
+    "db:import": "node import_all_data.js",
+    "parse-employees": "node parse_employees.js",
+    "db:rebuild": "node setup_and_import.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "csv-parse": "^5.5.6",
+    "csv-parser": "^3.2.0",
+    "express": "^4.19.2",
+    "multer": "^1.4.5-lts.1",
+    "puppeteer": "^22.9.0",
+    "sqlite3": "^5.1.7",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}
