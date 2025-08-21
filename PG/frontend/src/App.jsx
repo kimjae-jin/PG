@@ -3,24 +3,24 @@ import { Outlet, useLocation, Link } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import { Sun, Moon, UserCircle, ChevronRight } from 'lucide-react';
 
-// [핵심 수정] 전역 상태 관리를 위한 Context 생성
 const AppContext = createContext();
-
 export const useAppContext = () => useContext(AppContext);
 
-// [핵심 수정] Breadcrumb가 전역 상태를 사용하도록 변경
+// --- 전역 유틸리티 함수 ---
+export const formatDate = (dateValue) => { if (!dateValue) return '-'; let date; if (!isNaN(dateValue) && String(dateValue).length > 10) { date = new Date(Number(dateValue)); } else { date = new Date(dateValue); } if (isNaN(date.getTime())) return String(dateValue); return date.toISOString().split('T')[0]; };
+export const formatCurrency = (amount) => amount != null ? `${Number(amount).toLocaleString('ko-KR')}` : '0';
+export const truncateText = (text, maxLength) => { if (typeof text !== 'string' || text.length <= maxLength) return text; return text.substring(0, maxLength) + '...'; };
+
 const Breadcrumb = () => {
     const { breadcrumbData } = useAppContext();
     const location = useLocation();
     const paths = location.pathname.split('/').filter(p => p);
-    
     return (
         <div className="flex items-center text-sm font-semibold text-text-muted">
             <Link to="/" className="hover:text-text-color">ERP</Link>
             {paths.length > 0 && <ChevronRight size={16} className="mx-1" />}
             {paths[0] === 'projects' && <Link to="/projects" className="hover:text-text-color">프로젝트</Link>}
             {paths[1] && <ChevronRight size={16} className="mx-1" />}
-            {/* 전역 상태에 저장된 프로젝트 넘버를 표시 */}
             {paths[1] && paths[0] === 'projects' && <span>{paths[1] === 'new' ? '신규 등록' : breadcrumbData.projectNo || `ID: ${paths[1]}`}</span>}
         </div>
     );
@@ -28,19 +28,20 @@ const Breadcrumb = () => {
 
 function App() {
   const [currentTime, setCurrentTime] = useState('');
-  // [핵심 수정] Breadcrumb를 위한 전역 상태
   const [breadcrumbData, setBreadcrumbData] = useState({});
+  useEffect(() => { const timer = setInterval(() => { const options = { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }; setCurrentTime(new Date().toLocaleString('ko-KR', options)); }, 1000); return () => clearInterval(timer); }, []);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      const options = { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
-      setCurrentTime(new Date().toLocaleString('ko-KR', options));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
+  // [핵심 수정] truncateText 함수를 context에 포함하여 전파
+  const contextValue = {
+    breadcrumbData,
+    setBreadcrumbData,
+    formatDate,
+    formatCurrency,
+    truncateText
+  };
 
   return (
-    <AppContext.Provider value={{ breadcrumbData, setBreadcrumbData }}>
+    <AppContext.Provider value={contextValue}>
         <div className="flex h-screen bg-main-bg text-text-color">
           <Sidebar />
           <main className="flex-1 flex flex-col overflow-hidden">
@@ -48,17 +49,12 @@ function App() {
               <div><Breadcrumb /></div>
               <div className="flex items-center space-x-4">
                 <span className="text-sm text-text-muted">{currentTime}</span>
-                <div className="flex items-center space-x-2">
-                    <button className="p-2 rounded-full hover:bg-tab-hover"><Sun size={18} /></button>
-                </div>
-                <div className="flex items-center space-x-2">
-                    <UserCircle size={24} />
-                    <span className="font-semibold">여니서방 님</span>
-                </div>
+                <div className="flex items-center space-x-2"><button className="p-2 rounded-full hover:bg-tab-hover"><Sun size={18} /></button></div>
+                <div className="flex items-center space-x-2"><UserCircle size={24} /><span className="font-semibold">여니서방 님</span></div>
               </div>
             </header>
             <div className="flex-1 overflow-y-auto">
-              <Outlet context={{ setBreadcrumbData }} />
+              <Outlet />
             </div>
           </main>
         </div>
